@@ -315,8 +315,9 @@ function proxyUrl(raw) {
     } else {
       btns.forEach(b => {
         const a = document.createElement('a');
-        a.href      = b.url;
-        a.download  = '';
+a.href      = b.url;
+a.target    = '_blank';
+a.rel       = 'noopener noreferrer';
         a.className = 'dl-btn' + (b.primary ? ' primary-dl' : '');
         a.innerHTML = `<span class="dl-btn-label">${b.label}</span><span class="dl-btn-badge">${b.badge}</span>`;
         opts.appendChild(a);
