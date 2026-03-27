@@ -24,32 +24,12 @@
       --serif:   'Cormorant Garamond', Georgia, serif;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-    body::before {
-      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.6;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    }
+    body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.6; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+    body::after { content: ''; position: fixed; top: -30%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; pointer-events: none; z-index: 0; background: radial-gradient(ellipse, rgba(232,213,176,0.045) 0%, transparent 70%); }
 
-    body::after {
-      content: ''; position: fixed; top: -30%; left: 50%; transform: translateX(-50%);
-      width: 600px; height: 600px; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse, rgba(232,213,176,0.045) 0%, transparent 70%);
-    }
-
-    .page {
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 48px 24px; position: relative; z-index: 1;
-    }
+    .page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; position: relative; z-index: 1; }
 
     header { text-align: center; margin-bottom: 56px; animation: fadeUp .8s ease both; }
     .logo-mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
@@ -63,7 +43,6 @@
 
     .input-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; }
     .input-row { display: flex; gap: 10px; margin-bottom: 8px; }
-
     .url-input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 13px 16px; outline: none; transition: border-color .2s; border-radius: var(--radius); }
     .url-input::placeholder { color: var(--muted); }
     .url-input:focus { border-color: var(--accent2); }
@@ -72,7 +51,6 @@
     .btn-fetch:hover { background: var(--accent2); }
     .btn-fetch:active { transform: scale(.98); }
     .btn-fetch:disabled { opacity: .4; cursor: not-allowed; transform: none; }
-
     .hint { font-size: 10px; color: var(--muted); letter-spacing: .05em; }
 
     .divider { height: 1px; background: var(--border); margin: 32px 0; position: relative; }
@@ -82,11 +60,9 @@
     #status.loading { color: var(--accent2); }
     #status.error   { color: var(--danger); }
     #status.success { color: var(--success); }
-
     .spinner { display: inline-block; width: 10px; height: 10px; border: 1px solid var(--border); border-top-color: var(--accent2); border-radius: 50%; animation: spin .7s linear infinite; margin-right: 8px; vertical-align: middle; }
 
     #result { display: none; animation: fadeUp .4s ease both; }
-
     .result-meta { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
     .thumb-wrap { width: 80px; height: 100px; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius); }
     .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -98,7 +74,6 @@
     .stat strong { color: var(--text); font-weight: 400; display: block; font-size: 13px; }
 
     .download-options { display: flex; flex-direction: column; gap: 8px; }
-
     .dl-btn { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); color: var(--text); text-decoration: none; font-family: var(--mono); font-size: 11px; cursor: pointer; transition: border-color .2s, background .2s; border-radius: var(--radius); }
     .dl-btn:hover { border-color: var(--accent2); background: rgba(232,213,176,.04); }
     .dl-btn-label { letter-spacing: .1em; text-transform: uppercase; }
@@ -114,8 +89,6 @@
     .step-desc { font-size: 10px; color: var(--muted); line-height: 1.5; }
 
     footer { margin-top: 40px; text-align: center; font-size: 10px; color: var(--muted); letter-spacing: .12em; animation: fadeUp .8s .2s ease both; }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--accent2); }
 
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -150,9 +123,7 @@
       <button class="btn-fetch" id="fetchBtn" onclick="fetchVideo()">Fetch</button>
     </div>
     <p class="hint">Supports tiktok.com and vm.tiktok.com short links</p>
-
     <div class="divider"></div>
-
     <div id="status"></div>
     <div id="result">
       <div class="result-meta">
@@ -173,30 +144,18 @@
 
   <div class="how-to">
     <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-title">Copy link</div>
-        <div class="step-desc">Tap Share on TikTok and copy the video link</div>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-title">Paste & fetch</div>
-        <div class="step-desc">Paste the URL above and press Fetch</div>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-title">Download</div>
-        <div class="step-desc">Choose your format and save to device</div>
-      </div>
+      <div class="step"><div class="step-num">01</div><div class="step-title">Copy link</div><div class="step-desc">Tap Share on TikTok and copy the video link</div></div>
+      <div class="step"><div class="step-num">02</div><div class="step-title">Paste & fetch</div><div class="step-desc">Paste the URL above and press Fetch</div></div>
+      <div class="step"><div class="step-num">03</div><div class="step-title">Download</div><div class="step-desc">Choose your format and save to device</div></div>
     </div>
   </div>
 
-  <footer>
-    <p>For personal use only &nbsp;·&nbsp; No data stored</p>
-  </footer>
+  <footer><p>For personal use only &nbsp;·&nbsp; No data stored</p></footer>
 
 </div>
 <script>
+  const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
+
   const statusEl = document.getElementById('status');
   const resultEl = document.getElementById('result');
   const fetchBtn = document.getElementById('fetchBtn');
@@ -206,9 +165,7 @@
 
   function setStatus(type, msg) {
     statusEl.className = type;
-    statusEl.innerHTML = type === 'loading'
-      ? `<span class="spinner"></span>${msg}`
-      : msg;
+    statusEl.innerHTML = type === 'loading' ? `<span class="spinner"></span>${msg}` : msg;
   }
 
   function fmt(n) {
@@ -227,14 +184,9 @@
     setStatus('loading', 'Fetching video data...');
 
     try {
-      // Llamamos directo a tikwm desde el frontend — sin backend propio
-      const res  = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`);
+      const res  = await fetch(`${WORKER}/video?url=${encodeURIComponent(url)}`);
       const json = await res.json();
-
-      if (!json || json.code !== 0 || !json.data) {
-        throw new Error(json?.msg || 'Could not fetch video. Check the URL and try again.');
-      }
-
+      if (!json.ok) throw new Error(json.error || 'Unknown error');
       render(json.data);
       setStatus('success', '✓ Video found — choose a format below.');
     } catch (err) {
@@ -254,16 +206,12 @@
 
     const opts = document.getElementById('downloadOptions');
     opts.innerHTML = '';
-
-    // tikwm ofrece links de descarga directa con el parámetro /video/
-    // Usamos sus propios endpoints que sirven el archivo correctamente
-    const id = d.id;
     const btns = [];
 
-    if (d.hdplay) btns.push({ label: 'Video HD · No Watermark', badge: 'HD · MP4', url: `https://tikwm.com/video/media/hdplay/${id}.mp4`, primary: true });
-    if (d.play)   btns.push({ label: 'Video SD · No Watermark', badge: 'SD · MP4', url: `https://tikwm.com/video/media/play/${id}.mp4`,   primary: !d.hdplay });
-    if (d.wmplay) btns.push({ label: 'Video · With Watermark',  badge: 'MP4',      url: `https://tikwm.com/video/media/wmplay/${id}.mp4`, primary: false });
-    if (d.music)  btns.push({ label: 'Audio only',              badge: 'MP3',      url: `https://tikwm.com/video/media/music/${id}.mp3`,  primary: false });
+    if (d.hdplay) btns.push({ label: 'Video HD · No Watermark', badge: 'HD · MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.hdplay)}`, primary: true });
+    if (d.play)   btns.push({ label: 'Video SD · No Watermark', badge: 'SD · MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`,   primary: !d.hdplay });
+    if (d.wmplay) btns.push({ label: 'Video · With Watermark',  badge: 'MP4',      url: `${WORKER}/proxy?url=${encodeURIComponent(d.wmplay)}`, primary: false });
+    if (d.music)  btns.push({ label: 'Audio only',              badge: 'MP3',      url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`,  primary: false });
 
     if (!btns.length) {
       opts.innerHTML = '<p style="font-size:11px;color:var(--muted)">No download links found.</p>';
@@ -273,8 +221,7 @@
     btns.forEach(b => {
       const a = document.createElement('a');
       a.href      = b.url;
-      a.target    = '_blank';
-      a.rel       = 'noopener noreferrer';
+      a.download  = '';
       a.className = 'dl-btn' + (b.primary ? ' primary-dl' : '');
       a.innerHTML = `<span class="dl-btn-label">${b.label}</span><span class="dl-btn-badge">${b.badge}</span>`;
       opts.appendChild(a);
