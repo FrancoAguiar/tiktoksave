@@ -267,9 +267,9 @@
     return String(n);
   }
 
-  function proxyUrl(raw) {
-    return `${API}/proxy?url=${encodeURIComponent(raw)}`;
-  }
+ function proxyUrl(raw) {
+  return raw;
+}
 
   async function fetchVideo() {
     const url = urlInput.value.trim();
