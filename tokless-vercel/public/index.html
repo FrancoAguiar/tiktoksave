@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tokless — TikTok Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0a0a;
+      --surface: #111111;
+      --border:  #222222;
+      --accent:  #e8d5b0;
+      --accent2: #c4a882;
+      --text:    #e8e8e8;
+      --muted:   #666666;
+      --danger:  #c0624e;
+      --success: #6b9e7a;
+      --radius:  4px;
+      --mono:    'DM Mono', monospace;
+      --serif:   'Cormorant Garamond', Georgia, serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Grain */
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.6;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    /* Ambient glow */
+    body::after {
+      content: ''; position: fixed; top: -30%; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse, rgba(232,213,176,0.045) 0%, transparent 70%);
+    }
+
+    .page {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px 24px; position: relative; z-index: 1;
+    }
+
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 56px; animation: fadeUp .8s ease both; }
+
+    .logo-mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .logo-icon {
+      width: 28px; height: 28px;
+      border: 1px solid var(--accent2);
+      display: flex; align-items: center; justify-content: center;
+      transform: rotate(45deg);
+    }
+    .logo-icon::after { content: ''; width: 10px; height: 10px; background: var(--accent); transform: rotate(-45deg); }
+    .logo-text { font-family: var(--serif); font-size: 28px; font-weight: 300; letter-spacing: .08em; color: var(--accent); }
+    .tagline   { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+    /* ── Card ── */
+    .card {
+      width: 100%; max-width: 580px;
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 40px; position: relative;
+      animation: fadeUp .8s .1s ease both;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 40px; right: 40px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+      opacity: .4;
+    }
+
+    .input-label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; }
+    .input-row   { display: flex; gap: 10px; margin-bottom: 8px; }
+
+    .url-input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); font-family: var(--mono); font-size: 12px;
+      padding: 13px 16px; outline: none;
+      transition: border-color .2s; border-radius: var(--radius);
+    }
+    .url-input::placeholder { color: var(--muted); }
+    .url-input:focus { border-color: var(--accent2); }
+
+    .btn-fetch {
+      background: var(--accent); color: #0a0a0a; border: none;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .15em;
+      text-transform: uppercase; padding: 0 22px; cursor: pointer;
+      transition: background .2s, transform .1s; border-radius: var(--radius);
+      white-space: nowrap;
+    }
+    .btn-fetch:hover    { background: var(--accent2); }
+    .btn-fetch:active   { transform: scale(.98); }
+    .btn-fetch:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    .hint { font-size: 10px; color: var(--muted); letter-spacing: .05em; }
+
+    .divider { height: 1px; background: var(--border); margin: 32px 0; position: relative; }
+    .divider::after {
+      content: '◆'; position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%,-50%); background: var(--surface);
+      padding: 0 10px; color: var(--muted); font-size: 8px;
+    }
+
+    #status { min-height: 20px; font-size: 11px; letter-spacing: .08em; }
+    #status.loading { color: var(--accent2); }
+    #status.error   { color: var(--danger); }
+    #status.success { color: var(--success); }
+
+    .spinner {
+      display: inline-block; width: 10px; height: 10px;
+      border: 1px solid var(--border); border-top-color: var(--accent2);
+      border-radius: 50%; animation: spin .7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+
+    /* ── Result ── */
+    #result { display: none; animation: fadeUp .4s ease both; }
+
+    .result-meta { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+    .thumb-wrap  { width: 80px; height: 100px; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius); }
+    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .meta-info { flex: 1; min-width: 0; }
+    .meta-author { font-family: var(--serif); font-size: 18px; font-weight: 300; color: var(--accent); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .meta-desc   { font-size: 11px; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .meta-stats  { display: flex; gap: 16px; margin-top: 10px; }
+    .stat        { font-size: 10px; color: var(--muted); letter-spacing: .08em; }
+    .stat strong { color: var(--text); font-weight: 400; display: block; font-size: 13px; }
+
+    .download-options { display: flex; flex-direction: column; gap: 8px; }
+    .dl-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); text-decoration: none; font-family: var(--mono);
+      font-size: 11px; cursor: pointer;
+      transition: border-color .2s, background .2s; border-radius: var(--radius);
+    }
+    .dl-btn:hover            { border-color: var(--accent2); background: rgba(232,213,176,.04); }
+    .dl-btn-label            { letter-spacing: .1em; text-transform: uppercase; }
+    .dl-btn-badge            { font-size: 9px; letter-spacing: .15em; color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; border-radius: 2px; }
+    .dl-btn.primary-dl       { border-color: var(--accent2); background: rgba(232,213,176,.06); }
+    .dl-btn.primary-dl .dl-btn-label { color: var(--accent); }
+
+    /* ── Steps ── */
+    .how-to { width: 100%; max-width: 580px; margin-top: 20px; animation: fadeUp .8s .15s ease both; }
+    .steps  { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+    .step   { background: var(--surface); padding: 20px; text-align: center; }
+    .step-num   { font-family: var(--serif); font-size: 28px; font-weight: 300; color: var(--accent2); opacity: .5; line-height: 1; margin-bottom: 8px; }
+    .step-title { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }
+    .step-desc  { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+    footer { margin-top: 40px; text-align: center; font-size: 10px; color: var(--muted); letter-spacing: .12em; animation: fadeUp .8s .2s ease both; }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent2); }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+      .input-row { flex-direction: column; }
+      .btn-fetch { padding: 13px; }
+      .steps { grid-template-columns: 1fr; }
+      .result-meta { flex-direction: column; }
+      .thumb-wrap { width: 100%; height: 160px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="logo-mark">
+      <div class="logo-icon"></div>
+      <span class="logo-text">Tokless</span>
+    </div>
+    <p class="tagline">TikTok · No Watermark · Free</p>
+  </header>
+
+  <div class="card">
+    <label class="input-label" for="urlInput">Paste video URL</label>
+    <div class="input-row">
+      <input id="urlInput" class="url-input" type="text"
+        placeholder="https://www.tiktok.com/@user/video/..."
+        autocomplete="off" spellcheck="false" />
+      <button class="btn-fetch" id="fetchBtn" onclick="fetchVideo()">Fetch</button>
+    </div>
+    <p class="hint">Supports tiktok.com and vm.tiktok.com short links</p>
+
+    <div class="divider"></div>
+
+    <div id="status"></div>
+    <div id="result">
+      <div class="result-meta">
+        <div class="thumb-wrap"><img id="thumbImg" src="" alt="" /></div>
+        <div class="meta-info">
+          <div class="meta-author" id="metaAuthor"></div>
+          <div class="meta-desc"   id="metaDesc"></div>
+          <div class="meta-stats">
+            <div class="stat"><strong id="statLikes">—</strong>Likes</div>
+            <div class="stat"><strong id="statViews">—</strong>Views</div>
+            <div class="stat"><strong id="statComments">—</strong>Comments</div>
+          </div>
+        </div>
+      </div>
+      <div class="download-options" id="downloadOptions"></div>
+    </div>
+  </div>
+
+  <div class="how-to">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Copy link</div>
+        <div class="step-desc">Tap Share on TikTok and copy the video link</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Paste & fetch</div>
+        <div class="step-desc">Paste the URL above and press Fetch</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Download</div>
+        <div class="step-desc">Choose your format and save to device</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>For personal use only &nbsp;·&nbsp; No data stored</p>
+  </footer>
+
+</div>
+<script>
+  // On Vercel, frontend and API live on the same domain — no absolute URL needed.
+  const API = '/api';
+
+  const statusEl = document.getElementById('status');
+  const resultEl = document.getElementById('result');
+  const fetchBtn = document.getElementById('fetchBtn');
+  const urlInput = document.getElementById('urlInput');
+
+  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchVideo(); });
+
+  function setStatus(type, msg) {
+    statusEl.className = type;
+    statusEl.innerHTML = type === 'loading'
+      ? `<span class="spinner"></span>${msg}`
+      : msg;
+  }
+
+  function fmt(n) {
+    if (!n && n !== 0) return '—';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  function proxyUrl(raw) {
+    return `${API}/proxy?url=${encodeURIComponent(raw)}`;
+  }
+
+  async function fetchVideo() {
+    const url = urlInput.value.trim();
+    if (!url) { setStatus('error', '↳ Please paste a TikTok URL first.'); return; }
+
+    resultEl.style.display = 'none';
+    fetchBtn.disabled      = true;
+    setStatus('loading', 'Fetching video data...');
+
+    try {
+      const res  = await fetch(`${API}/video?url=${encodeURIComponent(url)}`);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'Unknown error');
+      render(json.data);
+      setStatus('success', '✓ Video found — choose a format below.');
+    } catch (err) {
+      setStatus('error', `↳ ${err.message}`);
+    } finally {
+      fetchBtn.disabled = false;
+    }
+  }
+
+  function render(d) {
+    document.getElementById('thumbImg').src                = d.cover || '';
+    document.getElementById('metaAuthor').textContent      = '@' + (d.author?.username || 'unknown');
+    document.getElementById('metaDesc').textContent        = d.title || '—';
+    document.getElementById('statLikes').textContent       = fmt(d.stats?.likes);
+    document.getElementById('statViews').textContent       = fmt(d.stats?.plays);
+    document.getElementById('statComments').textContent    = fmt(d.stats?.comments);
+
+    const opts = document.getElementById('downloadOptions');
+    opts.innerHTML = '';
+    const dl = d.downloads || {};
+
+    const btns = [];
+    if (dl.hd)        btns.push({ label:'Video HD · No Watermark', badge:'HD · MP4', url: proxyUrl(dl.hd),        primary: true  });
+    if (dl.sd)        btns.push({ label:'Video SD · No Watermark', badge:'SD · MP4', url: proxyUrl(dl.sd),        primary: !dl.hd });
+    if (dl.watermark) btns.push({ label:'Video · With Watermark',  badge:'MP4',      url: proxyUrl(dl.watermark), primary: false });
+    if (dl.audio)     btns.push({ label:'Audio only',              badge:'MP3',      url: proxyUrl(dl.audio),     primary: false });
+
+    if (!btns.length) {
+      opts.innerHTML = '<p style="font-size:11px;color:var(--muted)">No download links found.</p>';
+    } else {
+      btns.forEach(b => {
+        const a = document.createElement('a');
+        a.href      = b.url;
+        a.download  = '';
+        a.className = 'dl-btn' + (b.primary ? ' primary-dl' : '');
+        a.innerHTML = `<span class="dl-btn-label">${b.label}</span><span class="dl-btn-badge">${b.badge}</span>`;
+        opts.appendChild(a);
+      });
+    }
+
+    resultEl.style.display = 'block';
+  }
+</script>
+</body>
+</html>

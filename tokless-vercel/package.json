@@ -1,0 +1,11 @@
+{
+  "name": "tokless",
+  "version": "1.0.0",
+  "description": "TikTok downloader — no watermark. Vercel serverless.",
+  "dependencies": {
+    "axios": "^1.7.2"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
