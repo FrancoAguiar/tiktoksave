@@ -345,10 +345,8 @@
     opts.innerHTML = '';
     const btns = [];
 
-    if (d.hdplay) btns.push({ label: 'Video HD · Sin marca de agua', badge: 'HD', url: `${WORKER}/proxy?url=${encodeURIComponent(d.hdplay)}`, primary: true });
-    if (d.play)   btns.push({ label: 'Video SD · Sin marca de agua', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`,   primary: !d.hdplay });
-    if (d.wmplay) btns.push({ label: 'Video · Con marca de agua',  badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.wmplay)}`, primary: false });
-    if (d.music)  btns.push({ label: 'Solo Audio',              badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`,  primary: false });
+if (d.play)  btns.push({ label: 'Descargar video', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
+if (d.music) btns.push({ label: 'Solo audio',      badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
 
     if (!btns.length) {
       opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No se encontraron enlaces de descarga disponibles.</p>';
