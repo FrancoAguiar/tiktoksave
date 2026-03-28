@@ -246,13 +246,13 @@
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Welcome Modal -->
-<div id="welcomeModal" class="modal-overlay">
+<!-- Welcome Modal (ahora oculto por defecto hasta verificar autenticación) -->
+<div id="welcomeModal" class="modal-overlay hidden">
   <div class="modal-content card">
     <h3>¡Bienvenido a TikDrop!</h3>
     <p>¿Cómo te gusta que te llamen?</p>
     <input type="text" id="nameInput" class="url-input" placeholder="Ingresa tu nombre..." autocomplete="off" />
-    <button class="btn-fetch modal-btn" onclick="saveName()">Entrar a la app</button>
+    <button class="btn-fetch modal-btn" id="saveNameBtn">Entrar a la app</button>
   </div>
 </div>
 
@@ -277,7 +277,7 @@
       <input id="urlInput" class="url-input" type="url"
         placeholder="Pega el enlace de tu video aquí..."
         autocomplete="off" spellcheck="false" inputmode="url" />
-      <button class="btn-fetch" id="fetchBtn" onclick="fetchVideo()">Descargar</button>
+      <button class="btn-fetch" id="fetchBtn">Descargar</button>
     </div>
     <p class="hint">Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com</p>
     
@@ -327,34 +327,103 @@
 
 </div>
 
-<script>
-  // --- Modal Logic ---
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  // --- Elementos del DOM ---
   const nameInput = document.getElementById('nameInput');
-  
-  // Guardar nombre al presionar enter
-  nameInput.addEventListener('keydown', e => { 
-    if (e.key === 'Enter') saveName(); 
-  });
-
-  function saveName() {
-    const inputVal = nameInput.value.trim();
-    // Si está vacío, por defecto será "Sol"
-    const finalName = inputVal !== '' ? inputVal : 'Sol';
-    
-    document.getElementById('userNameDisplay').textContent = finalName;
-    document.getElementById('welcomeModal').classList.add('hidden');
-    document.getElementById('greetingText').style.display = 'block';
-  }
-
-  // --- TikTok Fetch Logic ---
-  const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
-
+  const saveNameBtn = document.getElementById('saveNameBtn');
+  const welcomeModal = document.getElementById('welcomeModal');
+  const greetingText = document.getElementById('greetingText');
+  const userNameDisplay = document.getElementById('userNameDisplay');
   const statusEl = document.getElementById('status');
   const resultEl = document.getElementById('result');
   const fetchBtn = document.getElementById('fetchBtn');
   const urlInput = document.getElementById('urlInput');
 
+  // --- Lógica de Firebase para Recordar Usuario ---
+  let db = null;
+  let auth = null;
+  let currentUser = null;
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+  try {
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+
+    const initAuth = async () => {
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
+    };
+    
+    initAuth();
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        try {
+          // Buscamos si el usuario ya guardó su nombre anteriormente
+          const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists() && userDoc.data().name) {
+            // Ya existe, saltamos el modal y saludamos
+            userNameDisplay.textContent = userDoc.data().name;
+            welcomeModal.classList.add('hidden');
+            greetingText.style.display = 'block';
+          } else {
+            // Nuevo usuario, mostramos el modal
+            welcomeModal.classList.remove('hidden');
+          }
+        } catch (err) {
+          console.error("Error al cargar el perfil:", err);
+          welcomeModal.classList.remove('hidden');
+        }
+      }
+    });
+  } catch (e) {
+    console.warn("Firebase no está disponible, operando en modo invitado.");
+    welcomeModal.classList.remove('hidden');
+  }
+
+  // --- Lógica del Modal ---
+  nameInput.addEventListener('keydown', e => { 
+    if (e.key === 'Enter') saveName(); 
+  });
+  saveNameBtn.addEventListener('click', saveName);
+
+  async function saveName() {
+    const inputVal = nameInput.value.trim();
+    // Si está vacío, por defecto será "Sol"
+    const finalName = inputVal !== '' ? inputVal : 'Sol';
+    
+    userNameDisplay.textContent = finalName;
+    welcomeModal.classList.add('hidden');
+    greetingText.style.display = 'block';
+
+    // Guardar en la nube si está conectado
+    if (db && currentUser) {
+      try {
+        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+        await setDoc(userDocRef, { name: finalName });
+      } catch (err) {
+        console.error("Error guardando el nombre en la nube:", err);
+      }
+    }
+  }
+
+  // --- Lógica para buscar el TikTok ---
+  const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
+
   urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchVideo(); });
+  fetchBtn.addEventListener('click', fetchVideo);
 
   function setStatus(type, msg) {
     statusEl.className = type;
