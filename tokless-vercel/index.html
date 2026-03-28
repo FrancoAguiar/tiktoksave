@@ -246,7 +246,7 @@
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Welcome Modal (ahora oculto por defecto hasta verificar autenticación) -->
+<!-- Welcome Modal (oculto por defecto hasta verificar estado de usuario en la base de datos) -->
 <div id="welcomeModal" class="modal-overlay hidden">
   <div class="modal-content card">
     <h3>¡Bienvenido a TikDrop!</h3>
@@ -329,7 +329,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // --- Elementos del DOM ---
@@ -348,55 +348,68 @@
   let currentUser = null;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-  async function initFirebase() {
-    try {
-      if (typeof __firebase_config === 'undefined') {
-        console.warn("Entorno sin base de datos detectado.");
-        welcomeModal.classList.remove('hidden');
-        return;
-      }
-
+  try {
+    if (typeof __firebase_config !== 'undefined') {
       const firebaseConfig = JSON.parse(__firebase_config);
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       db = getFirestore(app);
 
-      // Esperar la autenticación ANTES de consultar
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
-
-      // Una vez logueado, asignamos el usuario y buscamos sus datos guardados
-      currentUser = auth.currentUser;
-
-      if (currentUser) {
-        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists() && userDoc.data().name) {
-          // El nombre ya estaba guardado
-          userNameDisplay.textContent = userDoc.data().name;
-          welcomeModal.classList.add('hidden');
-          greetingText.style.display = 'block';
-        } else {
-          // Usuario nuevo, mostramos el modal para pedir el nombre
+      // Función de autenticación inicial
+      const initAuth = async () => {
+        try {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        } catch(e) {
+          console.error("Error autenticando:", e);
           welcomeModal.classList.remove('hidden');
         }
-      } else {
-        welcomeModal.classList.remove('hidden');
-      }
-    } catch (error) {
-      console.error("Error inicializando Firebase:", error);
+      };
+
+      initAuth();
+
+      // ESTE ES EL CAMBIO CLAVE: Esperamos a que Firebase confirme la sesión y luego buscamos/guardamos datos
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user; // Guardamos el usuario de forma global
+          
+          try {
+            // Buscamos si ya guardó su nombre en la base de datos
+            const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+            const userDoc = await getDoc(userDocRef);
+            
+            if (userDoc.exists() && userDoc.data().name) {
+              // El nombre ya estaba guardado en la nube
+              userNameDisplay.textContent = userDoc.data().name;
+              welcomeModal.classList.add('hidden');
+              greetingText.style.display = 'block';
+            } else {
+              // Usuario nuevo en la app, mostramos el modal para pedir el nombre
+              welcomeModal.classList.remove('hidden');
+            }
+          } catch (err) {
+            console.error("Error al buscar el perfil en Firebase:", err);
+            welcomeModal.classList.remove('hidden');
+          }
+        } else {
+          // No hay usuario activo (esto es raro, pero por seguridad)
+          welcomeModal.classList.remove('hidden');
+        }
+      });
+
+    } else {
+      console.warn("Base de datos no detectada. Funcionando en modo local.");
       welcomeModal.classList.remove('hidden');
     }
+  } catch (error) {
+    console.error("Error crítico inicializando la base de datos:", error);
+    welcomeModal.classList.remove('hidden');
   }
 
-  // Inicializar todo al cargar el script
-  initFirebase();
-
-  // --- Lógica del Modal ---
+  // --- Lógica del Modal (Guardar el Nombre) ---
   nameInput.addEventListener('keydown', e => { 
     if (e.key === 'Enter') saveName(); 
   });
@@ -407,15 +420,17 @@
     // Si está vacío, por defecto será "Sol"
     const finalName = inputVal !== '' ? inputVal : 'Sol';
     
+    // Mostramos el nombre inmediatamente en la pantalla (optimista)
     userNameDisplay.textContent = finalName;
     welcomeModal.classList.add('hidden');
     greetingText.style.display = 'block';
 
-    // Guardar en la nube asegurándonos de que Firebase esté inicializado y autenticado
+    // Guardar en la nube (Firestore) para la próxima vez
     if (db && currentUser) {
       try {
         const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
         await setDoc(userDocRef, { name: finalName });
+        console.log("Nombre guardado exitosamente.");
       } catch (err) {
         console.error("Error guardando el nombre en la nube:", err);
       }
