@@ -329,7 +329,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // --- Elementos del DOM ---
@@ -345,53 +345,56 @@
 
   // --- Lógica de Firebase para Recordar Usuario ---
   let db = null;
-  let auth = null;
   let currentUser = null;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-  try {
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-    const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
+  async function initFirebase() {
+    try {
+      if (typeof __firebase_config === 'undefined') {
+        console.warn("Entorno sin base de datos detectado.");
+        welcomeModal.classList.remove('hidden');
+        return;
+      }
 
-    const initAuth = async () => {
+      const firebaseConfig = JSON.parse(__firebase_config);
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      db = getFirestore(app);
+
+      // Esperar la autenticación ANTES de consultar
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
       } else {
         await signInAnonymously(auth);
       }
-    };
-    
-    initAuth();
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        try {
-          // Buscamos si el usuario ya guardó su nombre anteriormente
-          const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists() && userDoc.data().name) {
-            // Ya existe, saltamos el modal y saludamos
-            userNameDisplay.textContent = userDoc.data().name;
-            welcomeModal.classList.add('hidden');
-            greetingText.style.display = 'block';
-          } else {
-            // Nuevo usuario, mostramos el modal
-            welcomeModal.classList.remove('hidden');
-          }
-        } catch (err) {
-          console.error("Error al cargar el perfil:", err);
+      // Una vez logueado, asignamos el usuario y buscamos sus datos guardados
+      currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists() && userDoc.data().name) {
+          // El nombre ya estaba guardado
+          userNameDisplay.textContent = userDoc.data().name;
+          welcomeModal.classList.add('hidden');
+          greetingText.style.display = 'block';
+        } else {
+          // Usuario nuevo, mostramos el modal para pedir el nombre
           welcomeModal.classList.remove('hidden');
         }
+      } else {
+        welcomeModal.classList.remove('hidden');
       }
-    });
-  } catch (e) {
-    console.warn("Firebase no está disponible, operando en modo invitado.");
-    welcomeModal.classList.remove('hidden');
+    } catch (error) {
+      console.error("Error inicializando Firebase:", error);
+      welcomeModal.classList.remove('hidden');
+    }
   }
+
+  // Inicializar todo al cargar el script
+  initFirebase();
 
   // --- Lógica del Modal ---
   nameInput.addEventListener('keydown', e => { 
@@ -408,7 +411,7 @@
     welcomeModal.classList.add('hidden');
     greetingText.style.display = 'block';
 
-    // Guardar en la nube si está conectado
+    // Guardar en la nube asegurándonos de que Firebase esté inicializado y autenticado
     if (db && currentUser) {
       try {
         const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
