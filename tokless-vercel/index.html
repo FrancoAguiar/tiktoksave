@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>TikDrop — Descarga tu TikTok sin marcas de agua</title>
   <style>
-    /* ==========================================================================
-       Ultra-Modern Apple / VisionOS Style
-       ========================================================================== */
     :root {
-      /* Light Mode Palette (Default) */
       --bg-color: #fbfbfd;
       --surface: rgba(255, 255, 255, 0.6);
       --surface-hover: rgba(255, 255, 255, 0.8);
@@ -24,22 +20,17 @@
       --input-bg: rgba(0, 0, 0, 0.04);
       --success: #34c759;
       --danger: #ff3b30;
-      
       --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.04);
       --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
-      
       --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 12px;
       --radius-sm: 8px;
-      
-      /* System Fonts for native Apple feel */
       --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        /* Dark Mode Palette */
         --bg-color: #000000;
         --surface: rgba(28, 28, 30, 0.5);
         --surface-hover: rgba(44, 44, 46, 0.6);
@@ -52,7 +43,6 @@
         --btn-bg: #f5f5f7;
         --btn-text: #000000;
         --input-bg: rgba(255, 255, 255, 0.05);
-        
         --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.2);
         --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
       }
@@ -60,19 +50,17 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body { 
-      height: 100%; 
-      background-color: var(--bg-color); 
-      color: var(--text-main); 
-      font-family: var(--font-sans); 
-      font-size: 15px; 
-      line-height: 1.4; 
-      -webkit-font-smoothing: antialiased; 
-      -moz-osx-font-smoothing: grayscale;
+    html, body {
+      height: 100%;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    /* Ambient Background Orbs */
     .ambient-bg {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       overflow: hidden; pointer-events: none; z-index: 0;
@@ -92,70 +80,65 @@
       .orb-3 { background: #1a4a40; }
     }
 
-    .page { 
-      min-height: 100vh; display: flex; flex-direction: column; align-items: center; 
-      justify-content: center; padding: 60px 20px; position: relative; z-index: 1; 
+    .page {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px; position: relative; z-index: 1;
     }
 
-    /* Greeting */
     .greeting {
       font-size: 16px; font-weight: 500; color: var(--accent);
       margin-bottom: 8px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
-    /* Header */
     header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
     .logo-mark { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .logo-text { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-main); }
     .tagline { font-size: 15px; font-weight: 500; color: var(--text-muted); }
 
-    /* Main Glass Card */
-    .card { 
-      width: 100%; max-width: 520px; 
-      background: var(--surface); 
+    .card {
+      width: 100%; max-width: 520px;
+      background: var(--surface);
       backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%);
-      border: 1px solid var(--border); 
+      border: 1px solid var(--border);
       box-shadow: var(--shadow-lg), inset 0 1px 0 var(--border-light);
-      padding: 32px; 
+      padding: 32px;
       border-radius: var(--radius-xl);
-      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; 
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
     }
 
     .input-group { margin-bottom: 16px; position: relative; }
-    .url-input { 
-      width: 100%; background: var(--input-bg); border: 1px solid transparent; 
-      color: var(--text-main); font-family: var(--font-sans); font-size: 16px; 
-      padding: 16px 20px; padding-right: 125px; border-radius: var(--radius-lg); 
+    .url-input {
+      width: 100%; background: var(--input-bg); border: 1px solid transparent;
+      color: var(--text-main); font-family: var(--font-sans); font-size: 16px;
+      padding: 16px 20px; padding-right: 125px; border-radius: var(--radius-lg);
       outline: none; transition: all 0.2s ease;
     }
     .url-input::placeholder { color: var(--text-muted); }
     .url-input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15); }
 
-    .btn-fetch { 
+    .btn-fetch {
       position: absolute; right: 6px; top: 6px; bottom: 6px;
-      background: var(--btn-bg); color: var(--btn-text); border: none; 
-      font-size: 14px; font-weight: 600; padding: 0 20px; 
-      cursor: pointer; transition: transform 0.1s, background 0.2s, opacity 0.2s; 
-      border-radius: var(--radius-md); 
+      background: var(--btn-bg); color: var(--btn-text); border: none;
+      font-size: 14px; font-weight: 600; padding: 0 20px;
+      cursor: pointer; transition: transform 0.1s, background 0.2s, opacity 0.2s;
+      border-radius: var(--radius-md);
     }
     .btn-fetch:hover:not(:disabled) { opacity: 0.9; transform: scale(0.98); }
     .btn-fetch:active:not(:disabled) { transform: scale(0.95); }
     .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; }
-    
+
     .hint { font-size: 12px; color: var(--text-muted); text-align: center; }
 
-    /* Status Messages */
     #status { min-height: 20px; font-size: 14px; font-weight: 500; text-align: center; margin: 20px 0 0 0; }
     #status.loading { color: var(--accent); }
     #status.error   { color: var(--danger); animation: shake 0.5s; }
     #status.success { color: var(--success); }
-    .spinner { 
-      display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0, 113, 227, 0.2); 
-      border-top-color: var(--accent); border-radius: 50%; 
-      animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: -2px; 
+    .spinner {
+      display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0, 113, 227, 0.2);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: -2px;
     }
 
-    /* Result Area */
     #result { display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); animation: fadeUp 0.5s ease both; }
     .result-meta { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
     .thumb-wrap { width: 72px; height: 96px; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border); background: var(--input-bg); border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); }
@@ -167,31 +150,28 @@
     .stat { font-size: 12px; font-weight: 500; color: var(--text-muted); }
     .stat strong { color: var(--text-main); font-weight: 700; }
 
-    /* Download Buttons */
     .download-options { display: flex; flex-direction: column; gap: 8px; }
-    .dl-btn { 
-      display: flex; align-items: center; justify-content: space-between; padding: 16px; 
-      background: var(--input-bg); border: 1px solid transparent; color: var(--text-main); 
-      text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; 
-      transition: all 0.2s ease; border-radius: var(--radius-md); 
+    .dl-btn {
+      display: flex; align-items: center; justify-content: space-between; padding: 16px;
+      background: var(--input-bg); border: 1px solid transparent; color: var(--text-main);
+      text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s ease; border-radius: var(--radius-md);
     }
     .dl-btn:hover { background: var(--surface-hover); border-color: var(--border); transform: scale(1.01); }
     .dl-btn:active { transform: scale(0.99); }
     .dl-btn-badge { font-size: 11px; font-weight: 600; color: var(--text-muted); background: var(--border); padding: 4px 8px; border-radius: 6px; }
-    
     .dl-btn.primary-dl { background: var(--accent); color: #fff; }
     .dl-btn.primary-dl:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 8px 20px rgba(0, 113, 227, 0.3); }
     .dl-btn.primary-dl .dl-btn-badge { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
-    /* How To Steps Section */
     .how-to { width: 100%; max-width: 520px; margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
-    .step { 
+    .step {
       background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      padding: 20px 16px; text-align: center; border: 1px solid var(--border); 
+      padding: 20px 16px; text-align: center; border: 1px solid var(--border);
       border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
     }
-    .step-icon { 
-      width: 40px; height: 40px; background: var(--input-bg); border-radius: 50%; 
+    .step-icon {
+      width: 40px; height: 40px; background: var(--input-bg); border-radius: 50%;
       display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
       font-weight: 700; color: var(--text-main); font-size: 16px;
     }
@@ -200,32 +180,46 @@
 
     footer { margin-top: 48px; text-align: center; font-size: 12px; font-weight: 500; color: var(--text-muted); animation: fadeUp 1s 0.4s both; }
 
-    /* Modal Styles */
+    /* Modal */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1000; opacity: 1; transition: opacity 0.3s ease, visibility 0.3s;
+      z-index: 1000; transition: opacity 0.3s ease, visibility 0.3s;
     }
-    .modal-overlay.hidden {
-      opacity: 0; visibility: hidden; pointer-events: none;
-    }
+    .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     .modal-content {
       width: 90%; max-width: 360px; padding: 32px;
-      text-align: center; box-shadow: var(--shadow-lg);
+      text-align: center;
     }
     .modal-content h3 { margin-bottom: 8px; font-size: 20px; color: var(--text-main); }
     .modal-content p { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
-    .modal-btn { position: static; width: 100%; padding: 14px; margin-top: 16px; font-size: 15px; }
+    .modal-input { padding-right: 20px !important; }
+    .modal-btn {
+      position: static; width: 100%; padding: 14px; margin-top: 12px;
+      font-size: 15px; border-radius: var(--radius-md);
+      background: var(--btn-bg); color: var(--btn-text); border: none;
+      font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .modal-btn:hover { opacity: 0.85; }
 
-    /* Keyframes */
+    /* Chip para cambiar nombre */
+    .name-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-muted);
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 10px; margin-left: 8px;
+      cursor: pointer; vertical-align: middle;
+      transition: background 0.2s;
+    }
+    .name-chip:hover { background: var(--surface-hover); }
+
     @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -50px) scale(1.1); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
 
-    /* Responsive adjustments */
     @media (max-width: 540px) {
       .card { padding: 24px; border-radius: var(--radius-lg); }
       .input-group { display: flex; flex-direction: column; gap: 8px; }
@@ -239,26 +233,28 @@
 </head>
 <body>
 
-<!-- Ambient background -->
 <div class="ambient-bg">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Welcome Modal (oculto por defecto hasta verificar estado de usuario en la base de datos) -->
+<!-- Modal de bienvenida -->
 <div id="welcomeModal" class="modal-overlay hidden">
   <div class="modal-content card">
-    <h3>¡Bienvenidow a TikDrop!</h3>
-    <p>¿Cómo te gusta que te llamen?</p>
-    <input type="text" id="nameInput" class="url-input" placeholder="Ingresa tu nombre..." autocomplete="off" />
-    <button class="btn-fetch modal-btn" id="saveNameBtn">Entrar a la app</button>
+    <h3>¡Bienvenido a TikDrop!</h3>
+    <p>¿Cómso te gusta que te llamen?</p>
+    <input type="text" id="nameInput" class="url-input modal-input" placeholder="Ingresa tu nombre..." autocomplete="off" />
+    <button class="modal-btn" id="saveNameBtn">Entrar a la app</button>
   </div>
 </div>
 
 <div class="page">
 
-  <div class="greeting" id="greetingText" style="display: none;">¡Hola, <span id="userNameDisplay">Sol</span>! 👋</div>
+  <div class="greeting" id="greetingText" style="display: none;">
+    ¡Hola, <span id="userNameDisplay"></span>! 👋
+    <span class="name-chip" id="changeNameBtn" title="Cambiar nombre">✏️ cambiar</span>
+  </div>
 
   <header>
     <div class="logo-mark">
@@ -280,9 +276,7 @@
       <button class="btn-fetch" id="fetchBtn">Descargar</button>
     </div>
     <p class="hint">Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com</p>
-    
     <div id="status"></div>
-    
     <div id="result">
       <div class="result-meta">
         <div class="thumb-wrap"><img id="thumbImg" src="" alt="Miniatura del video" /></div>
@@ -327,116 +321,74 @@
 
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<script>
+  // ─── Constantes ───────────────────────────────────────────────
+  const STORAGE_KEY = 'tikdrop_username';
+  const WORKER      = 'https://tokless-proxy.necesitodisenos.workers.dev';
 
-  // --- Elementos del DOM ---
-  const nameInput = document.getElementById('nameInput');
-  const saveNameBtn = document.getElementById('saveNameBtn');
-  const welcomeModal = document.getElementById('welcomeModal');
-  const greetingText = document.getElementById('greetingText');
+  // ─── Elementos del DOM ────────────────────────────────────────
+  const welcomeModal    = document.getElementById('welcomeModal');
+  const nameInput       = document.getElementById('nameInput');
+  const saveNameBtn     = document.getElementById('saveNameBtn');
+  const greetingText    = document.getElementById('greetingText');
   const userNameDisplay = document.getElementById('userNameDisplay');
-  const statusEl = document.getElementById('status');
-  const resultEl = document.getElementById('result');
-  const fetchBtn = document.getElementById('fetchBtn');
-  const urlInput = document.getElementById('urlInput');
+  const changeNameBtn   = document.getElementById('changeNameBtn');
+  const statusEl        = document.getElementById('status');
+  const resultEl        = document.getElementById('result');
+  const fetchBtn        = document.getElementById('fetchBtn');
+  const urlInput        = document.getElementById('urlInput');
 
-  // --- Lógica de Firebase para Recordar Usuario ---
-  let db = null;
-  let auth = null;
-  let currentUser = null;
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-  // Lógica de autenticación rigurosamente estructurada para evitar fallos
-  async function startAppSession() {
-    try {
-      if (typeof __firebase_config === 'undefined') {
-        console.warn("Base de datos no detectada. Modo sin conexión.");
-        welcomeModal.classList.remove('hidden');
-        return;
-      }
-
-      const firebaseConfig = JSON.parse(__firebase_config);
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-
-      // PASO 1: Autenticar PRIMERO y esperar pacientemente
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
-
-      currentUser = auth.currentUser;
-
-      if (!currentUser) {
-        // Fallback seguro si la autenticación falló
-        welcomeModal.classList.remove('hidden');
-        return;
-      }
-
-      // PASO 2: Ahora que estamos seguros de la sesión, buscamos el nombre
-      const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
-      const docSnap = await getDoc(userDocRef);
-      
-      if (docSnap.exists() && docSnap.data().name) {
-        // Si el nombre existe, ocultamos el modal y saludamos
-        userNameDisplay.textContent = docSnap.data().name;
-        welcomeModal.classList.add('hidden');
-        greetingText.style.display = 'block';
-      } else {
-        // Si no existe, es un usuario nuevo, mostramos el modal
-        welcomeModal.classList.remove('hidden');
-      }
-
-    } catch (error) {
-      console.error("Error crítico inicializando Firebase:", error);
+  // ─── Lógica de nombre con localStorage ───────────────────────
+  function loadUser() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      // Usuario conocido → saludo directo, sin modal
+      showGreeting(saved);
+    } else {
+      // Primera vez → mostrar modal
       welcomeModal.classList.remove('hidden');
+      nameInput.focus();
     }
   }
 
-  // Iniciar todo el proceso inmediatamente
-  startAppSession();
+  function showGreeting(name) {
+    userNameDisplay.textContent = name;
+    greetingText.style.display  = 'block';
+    welcomeModal.classList.add('hidden');
+  }
 
-  // --- Lógica del Modal (Guardar el Nombre) ---
-  nameInput.addEventListener('keydown', e => { 
-    if (e.key === 'Enter') saveName(); 
-  });
+  function saveName() {
+    const name = nameInput.value.trim() || 'Sol';
+    localStorage.setItem(STORAGE_KEY, name); // ← persiste en el navegador
+    showGreeting(name);
+    nameInput.value = '';
+  }
+
+  // Guardar al presionar Enter o el botón
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
   saveNameBtn.addEventListener('click', saveName);
 
-  async function saveName() {
-    const inputVal = nameInput.value.trim();
-    const finalName = inputVal !== '' ? inputVal : 'Sol';
-    
-    // Mostramos el nombre visualmente rápido
-    userNameDisplay.textContent = finalName;
-    welcomeModal.classList.add('hidden');
-    greetingText.style.display = 'block';
+  // Botón para cambiar el nombre (vuelve a abrir el modal)
+  changeNameBtn.addEventListener('click', () => {
+    greetingText.style.display = 'none';
+    welcomeModal.classList.remove('hidden');
+    nameInput.value = localStorage.getItem(STORAGE_KEY) || '';
+    nameInput.focus();
+    nameInput.select();
+  });
 
-    // Guardar en la nube asegurándonos de usar { merge: true }
-    if (db && currentUser) {
-      try {
-        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
-        await setDoc(userDocRef, { name: finalName }, { merge: true });
-        console.log("Nombre guardado exitosamente en la nube.");
-      } catch (err) {
-        console.error("Error guardando el nombre en la nube:", err);
-      }
-    }
-  }
+  // Arrancar
+  loadUser();
 
-  // --- Lógica para buscar el TikTok ---
-  const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
-
+  // ─── Lógica de descarga ───────────────────────────────────────
   urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchVideo(); });
   fetchBtn.addEventListener('click', fetchVideo);
 
   function setStatus(type, msg) {
     statusEl.className = type;
-    statusEl.innerHTML = type === 'loading' ? `<span class="spinner"></span>${msg}` : msg;
+    statusEl.innerHTML = type === 'loading'
+      ? `<span class="spinner"></span>${msg}`
+      : msg;
   }
 
   function fmt(n) {
@@ -461,25 +413,25 @@
       render(json.data);
       setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
     } catch (err) {
-      setStatus('error', `${err.message}`);
+      setStatus('error', err.message);
     } finally {
       fetchBtn.disabled = false;
     }
   }
 
   function render(d) {
-    document.getElementById('thumbImg').src             = d.cover || d.origin_cover || '';
-    document.getElementById('metaAuthor').textContent   = '@' + (d.author?.unique_id || 'usuario');
-    document.getElementById('metaDesc').textContent     = d.title || 'Sin descripción';
-    document.getElementById('statLikes').textContent    = fmt(d.digg_count);
-    document.getElementById('statViews').textContent    = fmt(d.play_count);
+    document.getElementById('thumbImg').src           = d.cover || d.origin_cover || '';
+    document.getElementById('metaAuthor').textContent = '@' + (d.author?.unique_id || 'usuario');
+    document.getElementById('metaDesc').textContent   = d.title || 'Sin descripción';
+    document.getElementById('statLikes').textContent  = fmt(d.digg_count);
+    document.getElementById('statViews').textContent  = fmt(d.play_count);
 
     const opts = document.getElementById('downloadOptions');
     opts.innerHTML = '';
     const btns = [];
 
-    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
-    if (d.music) btns.push({ label: 'Descargar Solo Audio',      badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
+    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`,  primary: true  });
+    if (d.music) btns.push({ label: 'Descargar Solo Audio',       badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
 
     if (!btns.length) {
       opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No encontramos enlaces de descarga disponibles para este video.</p>';
@@ -487,7 +439,7 @@
     }
 
     btns.forEach(b => {
-      const a = document.createElement('a');
+      const a     = document.createElement('a');
       a.href      = b.url;
       a.download  = '';
       a.className = 'dl-btn' + (b.primary ? ' primary-dl' : '');
