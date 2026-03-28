@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Tokless — Descargador de TikTok</title>
+  <title>TikDrop — Descarga tu TikTok sin marcas de agua</title>
   <style>
     /* ==========================================================================
        Ultra-Modern Apple / VisionOS Style
@@ -97,11 +97,17 @@
       justify-content: center; padding: 60px 20px; position: relative; z-index: 1; 
     }
 
+    /* Greeting */
+    .greeting {
+      font-size: 16px; font-weight: 500; color: var(--accent);
+      margin-bottom: 8px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
     /* Header */
-    header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
     .logo-mark { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .logo-text { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-main); }
-    .tagline { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+    .logo-text { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-main); }
+    .tagline { font-size: 15px; font-weight: 500; color: var(--text-muted); }
 
     /* Main Glass Card */
     .card { 
@@ -112,14 +118,14 @@
       box-shadow: var(--shadow-lg), inset 0 1px 0 var(--border-light);
       padding: 32px; 
       border-radius: var(--radius-xl);
-      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; 
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; 
     }
 
     .input-group { margin-bottom: 16px; position: relative; }
     .url-input { 
       width: 100%; background: var(--input-bg); border: 1px solid transparent; 
       color: var(--text-main); font-family: var(--font-sans); font-size: 16px; 
-      padding: 16px 20px; padding-right: 110px; border-radius: var(--radius-lg); 
+      padding: 16px 20px; padding-right: 125px; border-radius: var(--radius-lg); 
       outline: none; transition: all 0.2s ease;
     }
     .url-input::placeholder { color: var(--text-muted); }
@@ -178,7 +184,7 @@
     .dl-btn.primary-dl .dl-btn-badge { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
     /* How To Steps Section */
-    .how-to { width: 100%; max-width: 520px; margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+    .how-to { width: 100%; max-width: 520px; margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
     .step { 
       background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       padding: 20px 16px; text-align: center; border: 1px solid var(--border); 
@@ -192,7 +198,25 @@
     .step-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
     .step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
 
-    footer { margin-top: 48px; text-align: center; font-size: 12px; font-weight: 500; color: var(--text-muted); animation: fadeUp 1s 0.3s both; }
+    footer { margin-top: 48px; text-align: center; font-size: 12px; font-weight: 500; color: var(--text-muted); animation: fadeUp 1s 0.4s both; }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 1; transition: opacity 0.3s ease, visibility 0.3s;
+    }
+    .modal-overlay.hidden {
+      opacity: 0; visibility: hidden; pointer-events: none;
+    }
+    .modal-content {
+      width: 90%; max-width: 360px; padding: 32px;
+      text-align: center; box-shadow: var(--shadow-lg);
+    }
+    .modal-content h3 { margin-bottom: 8px; font-size: 20px; color: var(--text-main); }
+    .modal-content p { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
+    .modal-btn { position: static; width: 100%; padding: 14px; margin-top: 16px; font-size: 15px; }
 
     /* Keyframes */
     @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -222,28 +246,40 @@
   <div class="orb orb-3"></div>
 </div>
 
+<!-- Welcome Modal -->
+<div id="welcomeModal" class="modal-overlay">
+  <div class="modal-content card">
+    <h3>¡Bienvenido a TikDrop!</h3>
+    <p>¿Cómo te gusta que te llamen?</p>
+    <input type="text" id="nameInput" class="url-input" placeholder="Ingresa tu nombre..." autocomplete="off" />
+    <button class="btn-fetch modal-btn" onclick="saveName()">Entrar a la app</button>
+  </div>
+</div>
+
 <div class="page">
+
+  <div class="greeting" id="greetingText" style="display: none;">¡Hola, <span id="userNameDisplay">Sol</span>! 👋</div>
 
   <header>
     <div class="logo-mark">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      <span class="logo-text">Tokless</span>
+      <span class="logo-text">TikDrop</span>
     </div>
-    <p class="tagline">TikTok · Sin Marca de Agua · Gratis</p>
+    <p class="tagline">Descarga tu TikTok favorito sin marca de agua</p>
   </header>
 
   <div class="card">
     <div class="input-group">
       <input id="urlInput" class="url-input" type="url"
-        placeholder="Pega el enlace de TikTok aquí..."
+        placeholder="Pega el enlace de tu video aquí..."
         autocomplete="off" spellcheck="false" inputmode="url" />
       <button class="btn-fetch" id="fetchBtn" onclick="fetchVideo()">Descargar</button>
     </div>
-    <p class="hint">Compatible con enlaces de tiktok.com y vm.tiktok.com</p>
+    <p class="hint">Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com</p>
     
     <div id="status"></div>
     
@@ -267,31 +303,50 @@
     <div class="step">
       <div class="step-icon">1</div>
       <div>
-        <div class="step-title">Copiar enlace</div>
-        <div class="step-desc">Toca Compartir en TikTok y copia el enlace del video.</div>
+        <div class="step-title">Copia el enlace</div>
+        <div class="step-desc">Abre TikTok, toca la flecha de 'Compartir' y elige 'Copiar enlace'.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-icon">2</div>
       <div>
-        <div class="step-title">Pegar y buscar</div>
-        <div class="step-desc">Pega el enlace en la caja de arriba y presiona Descargar.</div>
+        <div class="step-title">Pégalo aquí</div>
+        <div class="step-desc">Vuelve a TikDrop, pega tu enlace en la barra de arriba y presiona buscar.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-icon">3</div>
       <div>
-        <div class="step-title">Descargar</div>
-        <div class="step-desc">Elige tu formato favorito y guárdalo en tu dispositivo.</div>
+        <div class="step-title">¡Guárdalo!</div>
+        <div class="step-desc">Elige MP4 o MP3 y descarga el contenido directo a tu galería o PC.</div>
       </div>
     </div>
   </div>
 
-  <footer><p>Solo para uso personal &nbsp;·&nbsp; No almacenamos datos en nuestros servidores</p></footer>
+  <footer><p>Herramienta 100% gratuita &nbsp;·&nbsp; Privacidad garantizada (no almacenamos tus videos)</p></footer>
 
 </div>
 
 <script>
+  // --- Modal Logic ---
+  const nameInput = document.getElementById('nameInput');
+  
+  // Guardar nombre al presionar enter
+  nameInput.addEventListener('keydown', e => { 
+    if (e.key === 'Enter') saveName(); 
+  });
+
+  function saveName() {
+    const inputVal = nameInput.value.trim();
+    // Si está vacío, por defecto será "Sol"
+    const finalName = inputVal !== '' ? inputVal : 'Sol';
+    
+    document.getElementById('userNameDisplay').textContent = finalName;
+    document.getElementById('welcomeModal').classList.add('hidden');
+    document.getElementById('greetingText').style.display = 'block';
+  }
+
+  // --- TikTok Fetch Logic ---
   const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
 
   const statusEl = document.getElementById('status');
@@ -315,18 +370,18 @@
 
   async function fetchVideo() {
     const url = urlInput.value.trim();
-    if (!url) { setStatus('error', 'Por favor, pega un enlace de TikTok primero.'); return; }
+    if (!url) { setStatus('error', 'Por favor, pega un enlace válido de TikTok primero.'); return; }
 
     resultEl.style.display = 'none';
     fetchBtn.disabled = true;
-    setStatus('loading', 'Obteniendo datos del video...');
+    setStatus('loading', 'Preparando tu descarga...');
 
     try {
       const res  = await fetch(`${WORKER}/video?url=${encodeURIComponent(url)}`);
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'Error desconocido al procesar el enlace.');
+      if (!json.ok) throw new Error(json.error || 'Oops, no pudimos procesar ese enlace.');
       render(json.data);
-      setStatus('success', '¡Video encontrado! Elige un formato abajo.');
+      setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
     } catch (err) {
       setStatus('error', `${err.message}`);
     } finally {
@@ -345,11 +400,11 @@
     opts.innerHTML = '';
     const btns = [];
 
-if (d.play)  btns.push({ label: 'Descargar video', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
-if (d.music) btns.push({ label: 'Solo audio',      badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
+    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
+    if (d.music) btns.push({ label: 'Descargar Solo Audio',      badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
 
     if (!btns.length) {
-      opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No se encontraron enlaces de descarga disponibles.</p>';
+      opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No encontramos enlaces de descarga disponibles para este video.</p>';
       return;
     }
 
