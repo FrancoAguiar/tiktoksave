@@ -433,7 +433,10 @@
   let db = null;
   let auth = null;
   let currentUser = null;
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+  
+  // SOLUCIÓN: Limpiamos los caracteres especiales como las barras ("/") del appId
+  const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+  const appId = rawAppId.replace(/\//g, '_'); 
 
   async function startAppSession() {
     try {
@@ -505,8 +508,6 @@
   }
 
   // --- Lógica para buscar el Video ---
-  const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
-
   urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchVideo(); });
   fetchBtn.addEventListener('click', fetchVideo);
 
@@ -543,15 +544,15 @@
     }
   }
 
-  // --- Fetch TikTok (vía Cloudflare Worker) ---
+  // --- Fetch TikTok (Apuntando a la API de Vercel) ---
   async function fetchTikTok(url) {
-    const res  = await fetch(`${WORKER}/video?url=${encodeURIComponent(url)}`);
+    // LLAMADA A VERCEL: /api/video
+    const res  = await fetch(`/api/video?url=${encodeURIComponent(url)}`);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || 'Oops, no pudimos procesar ese enlace de TikTok.');
     
     const d = json.data;
     
-    // Restauramos formato de imagen
     thumbContainer.innerHTML = `<img id="thumbImg" src="${d.cover || d.origin_cover || ''}" alt="Miniatura" />`;
     
     document.getElementById('metaAuthor').textContent   = '@' + (d.author?.unique_id || 'usuario');
@@ -566,8 +567,9 @@
     opts.innerHTML = '';
     const btns = [];
 
-    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
-    if (d.music) btns.push({ label: 'Descargar Solo Audio',      badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
+    // proxy local de Vercel
+    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `/api/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
+    if (d.music) btns.push({ label: 'Descargar Solo Audio',      badge: 'MP3', url: `/api/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
 
     if (!btns.length) {
       opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No encontramos enlaces de descarga disponibles.</p>';
@@ -587,13 +589,12 @@
     setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
   }
 
-  // --- Fetch Instagram (Pasando por el Worker para evitar bloqueo CORS) ---
+  // --- Fetch Instagram (Apuntando a la API de Vercel) ---
   async function fetchInstagram(url) {
-    // Limpiamos los trackers del link de IG (?igsh=...)
     const cleanUrl = url.split('?')[0];
 
-    // Llamamos a nuestro Worker (el cual ya tiene la lógica de Cobalt integrada)
-    const res  = await fetch(`${WORKER}/instagram?url=${encodeURIComponent(cleanUrl)}`);
+    // LLAMADA A VERCEL: /api/instagram
+    const res  = await fetch(`/api/instagram?url=${encodeURIComponent(cleanUrl)}`);
     const json = await res.json();
     
     if (!json.ok) {
@@ -602,7 +603,6 @@
 
     const d = json.data;
 
-    // Colocamos una miniatura si el worker la trae, sino un SVG de fallback
     if (d.thumb) {
       thumbContainer.innerHTML = `<img id="thumbImg" src="${d.thumb}" alt="Miniatura" />`;
     } else {
@@ -617,7 +617,8 @@
     opts.innerHTML = '';
 
     const a = document.createElement('a');
-    a.href      = d.download; // El worker devuelve el enlace en json.data.download
+    // Para IG podemos usar el proxy también para forzar la descarga sin que se abra en el navegador
+    a.href      = `/api/proxy?url=${encodeURIComponent(d.download)}`; 
     a.target    = '_blank'; 
     a.className = 'dl-btn primary-dl';
     a.innerHTML = `<span>Descargar Reel</span><span class="dl-btn-badge">MP4</span>`;
