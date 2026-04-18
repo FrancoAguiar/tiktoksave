@@ -589,20 +589,49 @@
     setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
   }
 
-  // --- Fetch Instagram (Apuntando a la API de Vercel) ---
+  // --- Fetch Instagram (Híbrido: Cliente + Vercel API) ---
   async function fetchInstagram(url) {
     const cleanUrl = url.split('?')[0];
+    let d = null;
 
-    // LLAMADA A VERCEL: /api/instagram
-    const res  = await fetch(`/api/instagram?url=${encodeURIComponent(cleanUrl)}`);
-    const json = await res.json();
-    
-    if (!json.ok) {
-      throw new Error(json.error || 'Instagram bloqueó el video o es privado.');
+    // ESTRATEGIA 1 (CLIENTE): Intentamos descargar desde el navegador del usuario directamente.
+    // Esto es magia pura porque usa tu IP del wifi o 4G, evadiendo los bloqueos de servidores.
+    try {
+      const res1 = await fetch(`https://bk9.fun/download/instagram?url=${encodeURIComponent(cleanUrl)}`);
+      const json1 = await res1.json();
+      if (json1.status && json1.BK9 && json1.BK9.length > 0) {
+        d = { download: json1.BK9[0].url, thumb: '' };
+      }
+    } catch(e) {
+      // Ignoramos el error silenciosamente
     }
 
-    const d = json.data;
+    if (!d) {
+      try {
+        const res2 = await fetch(`https://api.ryzendesu.vip/api/downloader/igdl?url=${encodeURIComponent(cleanUrl)}`);
+        const json2 = await res2.json();
+        if (json2.data && Array.isArray(json2.data) && json2.data.length > 0) {
+          d = { download: json2.data[0].url, thumb: json2.data[0].thumbnail || '' };
+        } else if (json2.data && json2.data.url) {
+          d = { download: json2.data.url, thumb: json2.data.thumbnail || '' };
+        }
+      } catch(e) {}
+    }
 
+    // ESTRATEGIA 2 (BACKEND DE VERCEL): Si el navegador falló (por ej. por un AdBlocker), 
+    // caemos sobre tu servidor Vercel como red de seguridad.
+    if (!d) {
+      console.log("El cliente falló, intentando desde el backend de Vercel...");
+      const res  = await fetch(`/api/instagram?url=${encodeURIComponent(cleanUrl)}`);
+      const json = await res.json();
+      
+      if (!json.ok) {
+        throw new Error(json.error || 'Instagram bloqueó el video o es privado.');
+      }
+      d = json.data;
+    }
+
+    // Renderizamos el contenido
     if (d.thumb) {
       thumbContainer.innerHTML = `<img id="thumbImg" src="${d.thumb}" alt="Miniatura" />`;
     } else {
@@ -617,7 +646,6 @@
     opts.innerHTML = '';
 
     const a = document.createElement('a');
-    // Para IG podemos usar el proxy también para forzar la descarga sin que se abra en el navegador
     a.href      = `/api/proxy?url=${encodeURIComponent(d.download)}`; 
     a.target    = '_blank'; 
     a.className = 'dl-btn primary-dl';
