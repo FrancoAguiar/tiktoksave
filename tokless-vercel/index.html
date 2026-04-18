@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TikDrop — Descarga tu TikTok sin marcas de agua</title>
+  <title>TikDrop — Descarga TikTok e Instagram sin marcas de agua</title>
   <style>
+    /* ==========================================================================
+       Ultra-Modern Apple / VisionOS Style
+       ========================================================================== */
     :root {
+      /* Light Mode Palette (Default) */
       --bg-color: #fbfbfd;
       --surface: rgba(255, 255, 255, 0.6);
       --surface-hover: rgba(255, 255, 255, 0.8);
@@ -13,24 +17,32 @@
       --border-light: rgba(255, 255, 255, 0.5);
       --text-main: #1d1d1f;
       --text-muted: #86868b;
+      
+      /* Primary Accents (TikTok / Default) */
       --accent: #0071e3;
       --accent-hover: #0077ed;
       --btn-bg: #1d1d1f;
       --btn-text: #ffffff;
+      
       --input-bg: rgba(0, 0, 0, 0.04);
       --success: #34c759;
       --danger: #ff3b30;
+      
       --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.04);
       --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      
       --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 12px;
       --radius-sm: 8px;
+      
+      /* System Fonts for native Apple feel */
       --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
+        /* Dark Mode Palette */
         --bg-color: #000000;
         --surface: rgba(28, 28, 30, 0.5);
         --surface-hover: rgba(44, 44, 46, 0.6);
@@ -43,31 +55,47 @@
         --btn-bg: #f5f5f7;
         --btn-text: #000000;
         --input-bg: rgba(255, 255, 255, 0.05);
+        
         --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.2);
         --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
       }
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      font-size: 15px;
-      line-height: 1.4;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+    /* Instagram Mode Overrides */
+    body.ig-mode {
+      --accent: #e1306c;
+      --accent-hover: #c13584;
+    }
+    @media (prefers-color-scheme: light) {
+      body.ig-mode { --btn-bg: #e1306c; --btn-text: #ffffff; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body.ig-mode { --btn-bg: #e1306c; --btn-text: #ffffff; }
     }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { 
+      height: 100%; 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      font-family: var(--font-sans); 
+      font-size: 15px; 
+      line-height: 1.4; 
+      -webkit-font-smoothing: antialiased; 
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      transition: background-color 0.3s;
+    }
+
+    /* Ambient Background Orbs */
     .ambient-bg {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       overflow: hidden; pointer-events: none; z-index: 0;
     }
     .orb {
       position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
-      animation: float 20s infinite ease-in-out alternate;
+      animation: float 20s infinite ease-in-out alternate; transition: background 0.5s;
     }
     .orb-1 { width: 400px; height: 400px; background: #ff9a9e; top: -10%; left: -10%; }
     .orb-2 { width: 500px; height: 500px; background: #a1c4fd; bottom: -20%; right: -10%; animation-delay: -5s; }
@@ -80,65 +108,91 @@
       .orb-3 { background: #1a4a40; }
     }
 
-    .page {
-      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 60px 20px; position: relative; z-index: 1;
+    body.ig-mode .orb-1 { background: #fd1d1d; }
+    body.ig-mode .orb-2 { background: #833ab4; }
+    body.ig-mode .orb-3 { background: #fcb045; }
+
+    .page { 
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; 
+      justify-content: center; padding: 60px 20px; position: relative; z-index: 1; 
     }
 
+    /* Greeting */
     .greeting {
       font-size: 16px; font-weight: 500; color: var(--accent);
       margin-bottom: 8px; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: color 0.3s;
     }
 
+    /* Header */
     header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
     .logo-mark { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .logo-text { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-main); }
     .tagline { font-size: 15px; font-weight: 500; color: var(--text-muted); }
 
-    .card {
-      width: 100%; max-width: 520px;
-      background: var(--surface);
+    /* Main Glass Card */
+    .card { 
+      width: 100%; max-width: 520px; 
+      background: var(--surface); 
       backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border); 
       box-shadow: var(--shadow-lg), inset 0 1px 0 var(--border-light);
-      padding: 32px;
+      padding: 32px; 
       border-radius: var(--radius-xl);
-      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; 
     }
+
+    /* Segmented Control (Tabs) */
+    .segmented-control {
+      display: flex; background: var(--input-bg); padding: 4px; 
+      border-radius: var(--radius-md); margin-bottom: 24px;
+    }
+    .segment-btn {
+      flex: 1; padding: 10px 16px; border: none; background: transparent; color: var(--text-muted);
+      font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .segment-btn.active {
+      background: var(--surface); color: var(--text-main); box-shadow: var(--shadow-sm); 
+      border: 1px solid var(--border-light);
+    }
+    .segment-btn svg { width: 16px; height: 16px; }
 
     .input-group { margin-bottom: 16px; position: relative; }
-    .url-input {
-      width: 100%; background: var(--input-bg); border: 1px solid transparent;
-      color: var(--text-main); font-family: var(--font-sans); font-size: 16px;
-      padding: 16px 20px; padding-right: 125px; border-radius: var(--radius-lg);
-      outline: none; transition: all 0.2s ease;
+    .url-input { 
+      width: 100%; background: var(--input-bg); border: 1px solid transparent; 
+      color: var(--text-main); font-family: var(--font-sans); font-size: 16px; 
+      padding: 16px 20px; padding-right: 125px; border-radius: var(--radius-lg); 
+      outline: none; transition: all 0.3s ease;
     }
     .url-input::placeholder { color: var(--text-muted); }
-    .url-input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15); }
+    .url-input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(var(--accent), 0.15); }
 
-    .btn-fetch {
+    .btn-fetch { 
       position: absolute; right: 6px; top: 6px; bottom: 6px;
-      background: var(--btn-bg); color: var(--btn-text); border: none;
-      font-size: 14px; font-weight: 600; padding: 0 20px;
-      cursor: pointer; transition: transform 0.1s, background 0.2s, opacity 0.2s;
-      border-radius: var(--radius-md);
+      background: var(--btn-bg); color: var(--btn-text); border: none; 
+      font-size: 14px; font-weight: 600; padding: 0 20px; 
+      cursor: pointer; transition: transform 0.1s, background-color 0.3s, opacity 0.2s; 
+      border-radius: var(--radius-md); 
     }
     .btn-fetch:hover:not(:disabled) { opacity: 0.9; transform: scale(0.98); }
     .btn-fetch:active:not(:disabled) { transform: scale(0.95); }
     .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; }
-
+    
     .hint { font-size: 12px; color: var(--text-muted); text-align: center; }
 
+    /* Status Messages */
     #status { min-height: 20px; font-size: 14px; font-weight: 500; text-align: center; margin: 20px 0 0 0; }
     #status.loading { color: var(--accent); }
     #status.error   { color: var(--danger); animation: shake 0.5s; }
     #status.success { color: var(--success); }
-    .spinner {
-      display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0, 113, 227, 0.2);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: -2px;
+    .spinner { 
+      display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0, 113, 227, 0.2); 
+      border-top-color: var(--accent); border-radius: 50%; 
+      animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: -2px; 
     }
 
+    /* Result Area */
     #result { display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); animation: fadeUp 0.5s ease both; }
     .result-meta { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
     .thumb-wrap { width: 72px; height: 96px; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border); background: var(--input-bg); border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); }
@@ -150,28 +204,31 @@
     .stat { font-size: 12px; font-weight: 500; color: var(--text-muted); }
     .stat strong { color: var(--text-main); font-weight: 700; }
 
+    /* Download Buttons */
     .download-options { display: flex; flex-direction: column; gap: 8px; }
-    .dl-btn {
-      display: flex; align-items: center; justify-content: space-between; padding: 16px;
-      background: var(--input-bg); border: 1px solid transparent; color: var(--text-main);
-      text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer;
-      transition: all 0.2s ease; border-radius: var(--radius-md);
+    .dl-btn { 
+      display: flex; align-items: center; justify-content: space-between; padding: 16px; 
+      background: var(--input-bg); border: 1px solid transparent; color: var(--text-main); 
+      text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; 
+      transition: all 0.2s ease; border-radius: var(--radius-md); 
     }
     .dl-btn:hover { background: var(--surface-hover); border-color: var(--border); transform: scale(1.01); }
     .dl-btn:active { transform: scale(0.99); }
     .dl-btn-badge { font-size: 11px; font-weight: 600; color: var(--text-muted); background: var(--border); padding: 4px 8px; border-radius: 6px; }
-    .dl-btn.primary-dl { background: var(--accent); color: #fff; }
-    .dl-btn.primary-dl:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 8px 20px rgba(0, 113, 227, 0.3); }
+    
+    .dl-btn.primary-dl { background: var(--accent); color: #fff; transition: background-color 0.3s, transform 0.2s; }
+    .dl-btn.primary-dl:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
     .dl-btn.primary-dl .dl-btn-badge { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
+    /* How To Steps Section */
     .how-to { width: 100%; max-width: 520px; margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
-    .step {
+    .step { 
       background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      padding: 20px 16px; text-align: center; border: 1px solid var(--border);
+      padding: 20px 16px; text-align: center; border: 1px solid var(--border); 
       border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
     }
-    .step-icon {
-      width: 40px; height: 40px; background: var(--input-bg); border-radius: 50%;
+    .step-icon { 
+      width: 40px; height: 40px; background: var(--input-bg); border-radius: 50%; 
       display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
       font-weight: 700; color: var(--text-main); font-size: 16px;
     }
@@ -180,46 +237,32 @@
 
     footer { margin-top: 48px; text-align: center; font-size: 12px; font-weight: 500; color: var(--text-muted); animation: fadeUp 1s 0.4s both; }
 
-    /* Modal */
+    /* Modal Styles */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1000; transition: opacity 0.3s ease, visibility 0.3s;
+      z-index: 1000; opacity: 1; transition: opacity 0.3s ease, visibility 0.3s;
     }
-    .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .modal-overlay.hidden {
+      opacity: 0; visibility: hidden; pointer-events: none;
+    }
     .modal-content {
       width: 90%; max-width: 360px; padding: 32px;
-      text-align: center;
+      text-align: center; box-shadow: var(--shadow-lg);
     }
     .modal-content h3 { margin-bottom: 8px; font-size: 20px; color: var(--text-main); }
     .modal-content p { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
-    .modal-input { padding-right: 20px !important; }
-    .modal-btn {
-      position: static; width: 100%; padding: 14px; margin-top: 12px;
-      font-size: 15px; border-radius: var(--radius-md);
-      background: var(--btn-bg); color: var(--btn-text); border: none;
-      font-weight: 600; cursor: pointer; transition: opacity 0.2s;
-    }
-    .modal-btn:hover { opacity: 0.85; }
+    .modal-btn { position: static; width: 100%; padding: 14px; margin-top: 16px; font-size: 15px; }
 
-    /* Chip para cambiar nombre */
-    .name-chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px; color: var(--text-muted);
-      background: var(--input-bg); border: 1px solid var(--border);
-      border-radius: 20px; padding: 4px 10px; margin-left: 8px;
-      cursor: pointer; vertical-align: middle;
-      transition: background 0.2s;
-    }
-    .name-chip:hover { background: var(--surface-hover); }
-
+    /* Keyframes */
     @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -50px) scale(1.1); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
 
+    /* Responsive adjustments */
     @media (max-width: 540px) {
       .card { padding: 24px; border-radius: var(--radius-lg); }
       .input-group { display: flex; flex-direction: column; gap: 8px; }
@@ -233,28 +276,26 @@
 </head>
 <body>
 
+<!-- Ambient background -->
 <div class="ambient-bg">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Modal de bienvenida -->
+<!-- Welcome Modal -->
 <div id="welcomeModal" class="modal-overlay hidden">
   <div class="modal-content card">
     <h3>¡Bienvenido a TikDrop!</h3>
     <p>¿Cómo te gusta que te llamen?</p>
-    <input type="text" id="nameInput" class="url-input modal-input" placeholder="Ingresa tu nombre..." autocomplete="off" />
-    <button class="modal-btn" id="saveNameBtn">Entrar a la app</button>
+    <input type="text" id="nameInput" class="url-input" placeholder="Ingresa tu nombre..." autocomplete="off" />
+    <button class="btn-fetch modal-btn" id="saveNameBtn" style="background: var(--text-main); color: var(--bg-color);">Entrar a la app</button>
   </div>
 </div>
 
 <div class="page">
 
-  <div class="greeting" id="greetingText" style="display: none;">
-    ¡Hola, <span id="userNameDisplay"></span>! 👋
-    <span class="name-chip" id="changeNameBtn" title="Cambiar nombre">✏️ cambiar</span>
-  </div>
+  <div class="greeting" id="greetingText" style="display: none;">¡Hola, <span id="userNameDisplay">Sol</span>! 👋</div>
 
   <header>
     <div class="logo-mark">
@@ -265,27 +306,41 @@
       </svg>
       <span class="logo-text">TikDrop</span>
     </div>
-    <p class="tagline">Descarga tu TikTok favorito sin marca de agua</p>
+    <p class="tagline">Descarga TikTok e Instagram sin marca de agua</p>
   </header>
 
   <div class="card">
+    
+    <!-- Segmented Control for Platforms -->
+    <div class="segmented-control">
+      <button class="segment-btn active" id="tabTiktok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+        TikTok
+      </button>
+      <button class="segment-btn" id="tabInstagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        Instagram Reels
+      </button>
+    </div>
+
     <div class="input-group">
       <input id="urlInput" class="url-input" type="url"
-        placeholder="Pega el enlace de tu video aquí..."
+        placeholder="Pega el enlace de tu TikTok aquí..."
         autocomplete="off" spellcheck="false" inputmode="url" />
       <button class="btn-fetch" id="fetchBtn">Descargar</button>
     </div>
-    <p class="hint">Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com</p>
+    <p class="hint" id="hintText">Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com</p>
+    
     <div id="status"></div>
+    
     <div id="result">
       <div class="result-meta">
-        <div class="thumb-wrap"><img id="thumbImg" src="" alt="Miniatura del video" /></div>
+        <div class="thumb-wrap"><img id="thumbImg" src="" alt="Miniatura" /></div>
         <div class="meta-info">
           <div class="meta-author" id="metaAuthor"></div>
           <div class="meta-desc" id="metaDesc"></div>
-          <div class="meta-stats">
-            <div class="stat"><strong id="statLikes">—</strong> Me gusta</div>
-            <div class="stat"><strong id="statViews">—</strong> Vistas</div>
+          <div class="meta-stats" id="metaStats">
+            <!-- Stats inserted via JS -->
           </div>
         </div>
       </div>
@@ -298,7 +353,7 @@
       <div class="step-icon">1</div>
       <div>
         <div class="step-title">Copia el enlace</div>
-        <div class="step-desc">Abre TikTok, toca la flecha de 'Compartir' y elige 'Copiar enlace'.</div>
+        <div class="step-desc" id="step1-desc">Abre TikTok, toca la flecha de 'Compartir' y elige 'Copiar enlace'.</div>
       </div>
     </div>
     <div class="step">
@@ -312,7 +367,7 @@
       <div class="step-icon">3</div>
       <div>
         <div class="step-title">¡Guárdalo!</div>
-        <div class="step-desc">Elige MP4 o MP3 y descarga el contenido directo a tu galería o PC.</div>
+        <div class="step-desc">Elige el formato que prefieras y descarga el contenido directo a tu galería.</div>
       </div>
     </div>
   </div>
@@ -321,74 +376,143 @@
 
 </div>
 
-<script>
-  // ─── Constantes ───────────────────────────────────────────────
-  const STORAGE_KEY = 'tikdrop_username';
-  const WORKER      = 'https://tokless-proxy.necesitodisenos.workers.dev';
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // ─── Elementos del DOM ────────────────────────────────────────
-  const welcomeModal    = document.getElementById('welcomeModal');
-  const nameInput       = document.getElementById('nameInput');
-  const saveNameBtn     = document.getElementById('saveNameBtn');
-  const greetingText    = document.getElementById('greetingText');
+  // --- Elementos del DOM ---
+  const nameInput = document.getElementById('nameInput');
+  const saveNameBtn = document.getElementById('saveNameBtn');
+  const welcomeModal = document.getElementById('welcomeModal');
+  const greetingText = document.getElementById('greetingText');
   const userNameDisplay = document.getElementById('userNameDisplay');
-  const changeNameBtn   = document.getElementById('changeNameBtn');
-  const statusEl        = document.getElementById('status');
-  const resultEl        = document.getElementById('result');
-  const fetchBtn        = document.getElementById('fetchBtn');
-  const urlInput        = document.getElementById('urlInput');
+  
+  const statusEl = document.getElementById('status');
+  const resultEl = document.getElementById('result');
+  const fetchBtn = document.getElementById('fetchBtn');
+  const urlInput = document.getElementById('urlInput');
+  
+  const tabTiktok = document.getElementById('tabTiktok');
+  const tabInstagram = document.getElementById('tabInstagram');
+  const hintText = document.getElementById('hintText');
+  const step1Desc = document.getElementById('step1-desc');
 
-  // ─── Lógica de nombre con localStorage ───────────────────────
-  function loadUser() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      // Usuario conocido → saludo directo, sin modal
-      showGreeting(saved);
+  // Estado global
+  let platform = 'tiktok';
+
+  // --- Lógica de Pestañas (Plataformas) ---
+  tabTiktok.addEventListener('click', () => switchPlatform('tiktok'));
+  tabInstagram.addEventListener('click', () => switchPlatform('instagram'));
+
+  function switchPlatform(p) {
+    platform = p;
+    resultEl.style.display = 'none';
+    statusEl.innerHTML = '';
+    statusEl.className = '';
+    urlInput.value = '';
+
+    if (p === 'tiktok') {
+      document.body.classList.remove('ig-mode');
+      tabTiktok.classList.add('active');
+      tabInstagram.classList.remove('active');
+      urlInput.placeholder = 'Pega el enlace de tu TikTok aquí...';
+      hintText.textContent = 'Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com';
+      step1Desc.textContent = "Abre TikTok, toca la flecha de 'Compartir' y elige 'Copiar enlace'.";
     } else {
-      // Primera vez → mostrar modal
-      welcomeModal.classList.remove('hidden');
-      nameInput.focus();
+      document.body.classList.add('ig-mode');
+      tabInstagram.classList.add('active');
+      tabTiktok.classList.remove('active');
+      urlInput.placeholder = 'Pega el enlace de tu Instagram Reel aquí...';
+      hintText.textContent = 'Soporta enlaces de Reels públicos (instagram.com/reel/...)';
+      step1Desc.textContent = "Abre Instagram, toca en 'Compartir' o '...' y copia el enlace del Reel.";
     }
   }
 
-  function showGreeting(name) {
-    userNameDisplay.textContent = name;
-    greetingText.style.display  = 'block';
-    welcomeModal.classList.add('hidden');
+  // --- Lógica de Firebase para Recordar Usuario ---
+  let db = null;
+  let auth = null;
+  let currentUser = null;
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+  async function startAppSession() {
+    try {
+      if (typeof __firebase_config === 'undefined') {
+        console.warn("Base de datos no detectada. Modo sin conexión.");
+        welcomeModal.classList.remove('hidden');
+        return;
+      }
+
+      const firebaseConfig = JSON.parse(__firebase_config);
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
+
+      currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        welcomeModal.classList.remove('hidden');
+        return;
+      }
+
+      const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+      const docSnap = await getDoc(userDocRef);
+      
+      if (docSnap.exists() && docSnap.data().name) {
+        userNameDisplay.textContent = docSnap.data().name;
+        welcomeModal.classList.add('hidden');
+        greetingText.style.display = 'block';
+      } else {
+        welcomeModal.classList.remove('hidden');
+      }
+
+    } catch (error) {
+      console.error("Error inicializando Firebase:", error);
+      welcomeModal.classList.remove('hidden');
+    }
   }
 
-  function saveName() {
-    const name = nameInput.value.trim() || 'Sol';
-    localStorage.setItem(STORAGE_KEY, name); // ← persiste en el navegador
-    showGreeting(name);
-    nameInput.value = '';
-  }
+  startAppSession();
 
-  // Guardar al presionar Enter o el botón
-  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
+  // --- Lógica del Modal (Guardar el Nombre) ---
+  nameInput.addEventListener('keydown', e => { 
+    if (e.key === 'Enter') saveName(); 
+  });
   saveNameBtn.addEventListener('click', saveName);
 
-  // Botón para cambiar el nombre (vuelve a abrir el modal)
-  changeNameBtn.addEventListener('click', () => {
-    greetingText.style.display = 'none';
-    welcomeModal.classList.remove('hidden');
-    nameInput.value = localStorage.getItem(STORAGE_KEY) || '';
-    nameInput.focus();
-    nameInput.select();
-  });
+  async function saveName() {
+    const inputVal = nameInput.value.trim();
+    const finalName = inputVal !== '' ? inputVal : 'Sol';
+    
+    userNameDisplay.textContent = finalName;
+    welcomeModal.classList.add('hidden');
+    greetingText.style.display = 'block';
 
-  // Arrancar
-  loadUser();
+    if (db && currentUser) {
+      try {
+        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+        await setDoc(userDocRef, { name: finalName }, { merge: true });
+      } catch (err) {
+        console.error("Error guardando el nombre en la nube:", err);
+      }
+    }
+  }
 
-  // ─── Lógica de descarga ───────────────────────────────────────
+  // --- Lógica para buscar el Video (TikTok e IG) ---
+  const WORKER = 'https://tokless-proxy.necesitodisenos.workers.dev';
+
   urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchVideo(); });
   fetchBtn.addEventListener('click', fetchVideo);
 
   function setStatus(type, msg) {
     statusEl.className = type;
-    statusEl.innerHTML = type === 'loading'
-      ? `<span class="spinner"></span>${msg}`
-      : msg;
+    statusEl.innerHTML = type === 'loading' ? `<span class="spinner"></span>${msg}` : msg;
   }
 
   function fmt(n) {
@@ -400,46 +524,55 @@
 
   async function fetchVideo() {
     const url = urlInput.value.trim();
-    if (!url) { setStatus('error', 'Por favor, pega un enlace válido de TikTok primero.'); return; }
+    if (!url) { setStatus('error', 'Por favor, pega un enlace válido primero.'); return; }
 
     resultEl.style.display = 'none';
     fetchBtn.disabled = true;
     setStatus('loading', 'Preparando tu descarga...');
 
     try {
-      const res  = await fetch(`${WORKER}/video?url=${encodeURIComponent(url)}`);
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'Oops, no pudimos procesar ese enlace.');
-      render(json.data);
-      setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
+      if (platform === 'tiktok') {
+        await fetchTikTok(url);
+      } else {
+        await fetchInstagram(url);
+      }
     } catch (err) {
-      setStatus('error', err.message);
+      setStatus('error', `${err.message}`);
     } finally {
       fetchBtn.disabled = false;
     }
   }
 
-  function render(d) {
-    document.getElementById('thumbImg').src           = d.cover || d.origin_cover || '';
-    document.getElementById('metaAuthor').textContent = '@' + (d.author?.unique_id || 'usuario');
-    document.getElementById('metaDesc').textContent   = d.title || 'Sin descripción';
-    document.getElementById('statLikes').textContent  = fmt(d.digg_count);
-    document.getElementById('statViews').textContent  = fmt(d.play_count);
+  // --- Fetch TikTok ---
+  async function fetchTikTok(url) {
+    const res  = await fetch(`${WORKER}/video?url=${encodeURIComponent(url)}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Oops, no pudimos procesar ese enlace de TikTok.');
+    
+    const d = json.data;
+    document.getElementById('thumbImg').src             = d.cover || d.origin_cover || '';
+    document.getElementById('metaAuthor').textContent   = '@' + (d.author?.unique_id || 'usuario');
+    document.getElementById('metaDesc').textContent     = d.title || 'Sin descripción';
+    
+    document.getElementById('metaStats').innerHTML = `
+      <div class="stat"><strong>${fmt(d.digg_count)}</strong> Me gusta</div>
+      <div class="stat"><strong>${fmt(d.play_count)}</strong> Vistas</div>
+    `;
 
     const opts = document.getElementById('downloadOptions');
     opts.innerHTML = '';
     const btns = [];
 
-    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`,  primary: true  });
-    if (d.music) btns.push({ label: 'Descargar Solo Audio',       badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
+    if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `${WORKER}/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
+    if (d.music) btns.push({ label: 'Descargar Solo Audio',      badge: 'MP3', url: `${WORKER}/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
 
     if (!btns.length) {
-      opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No encontramos enlaces de descarga disponibles para este video.</p>';
+      opts.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px;">No encontramos enlaces de descarga disponibles.</p>';
       return;
     }
 
     btns.forEach(b => {
-      const a     = document.createElement('a');
+      const a = document.createElement('a');
       a.href      = b.url;
       a.download  = '';
       a.className = 'dl-btn' + (b.primary ? ' primary-dl' : '');
@@ -448,6 +581,34 @@
     });
 
     resultEl.style.display = 'block';
+    setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
+  }
+
+  // --- Fetch Instagram ---
+  async function fetchInstagram(url) {
+    const res  = await fetch(`${WORKER}/instagram?url=${encodeURIComponent(url)}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Oops, no pudimos procesar ese Reel de Instagram.');
+
+    const d = json.data;
+
+    document.getElementById('thumbImg').src             = d.thumb || '';
+    document.getElementById('metaAuthor').textContent   = '◈ Instagram Reel';
+    document.getElementById('metaDesc').textContent     = '¡Reel listo para descargar!';
+    document.getElementById('metaStats').innerHTML      = '';
+
+    const opts = document.getElementById('downloadOptions');
+    opts.innerHTML = '';
+
+    const a = document.createElement('a');
+    a.href      = `${WORKER}/proxy?url=${encodeURIComponent(d.download)}`;
+    a.download  = '';
+    a.className = 'dl-btn primary-dl';
+    a.innerHTML = `<span>Descargar Reel</span><span class="dl-btn-badge">MP4</span>`;
+    opts.appendChild(a);
+
+    resultEl.style.display = 'block';
+    setStatus('success', '¡Reel encontrado! Haz clic abajo para descargarlo.');
   }
 </script>
 </body>
