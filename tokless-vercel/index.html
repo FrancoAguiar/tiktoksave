@@ -587,29 +587,27 @@
     setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
   }
 
-  // --- Fetch Instagram (Directo desde el navegador para Evitar Cloudflare Baneo) ---
+  // --- Fetch Instagram (Pasando por el Worker para evitar bloqueo CORS) ---
   async function fetchInstagram(url) {
     // Limpiamos los trackers del link de IG (?igsh=...)
     const cleanUrl = url.split('?')[0];
 
-    // Llamamos directo a la API desde el navegador del usuario para usar su IP residencial
-    const res  = await fetch('https://api.cobalt.tools/api/json', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ url: cleanUrl })
-    });
-    
+    // Llamamos a nuestro Worker (el cual ya tiene la lógica de Cobalt integrada)
+    const res  = await fetch(`${WORKER}/instagram?url=${encodeURIComponent(cleanUrl)}`);
     const json = await res.json();
     
-    if (json.status === 'error') {
-      throw new Error('Instagram bloqueó el video o es privado.');
+    if (!json.ok) {
+      throw new Error(json.error || 'Instagram bloqueó el video o es privado.');
     }
 
-    // Colocamos un ícono SVG de Instagram como miniatura temporal
-    thumbContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
+    const d = json.data;
+
+    // Colocamos una miniatura si el worker la trae, sino un SVG de fallback
+    if (d.thumb) {
+      thumbContainer.innerHTML = `<img id="thumbImg" src="${d.thumb}" alt="Miniatura" />`;
+    } else {
+      thumbContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
+    }
 
     document.getElementById('metaAuthor').textContent   = '◈ Instagram Reel';
     document.getElementById('metaDesc').textContent     = '¡Video procesado correctamente!';
@@ -619,8 +617,8 @@
     opts.innerHTML = '';
 
     const a = document.createElement('a');
-    a.href      = json.url; // Cobalt nos da el enlace puro de descarga
-    a.target    = '_blank'; // Lo abrimos en otra pestaña para que descargue
+    a.href      = d.download; // El worker devuelve el enlace en json.data.download
+    a.target    = '_blank'; 
     a.className = 'dl-btn primary-dl';
     a.innerHTML = `<span>Descargar Reel</span><span class="dl-btn-badge">MP4</span>`;
     opts.appendChild(a);
