@@ -1,63 +1,29 @@
-/**
- * /api/proxy.js  →  Vercel Serverless Function
- * GET /api/proxy?url=<cdn_url>
- *
- * Streams TikTok CDN video/audio through this server so the browser
- * can download it without CORS errors.
- *
- * Security: only URLs from the ALLOWED_CDN list are proxied.
- */
-
-const axios        = require('axios');
-const { isCdnAllowed } = require('./services/tiktok');
-
-module.exports = async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin',  '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    return res.status(204).end();
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ ok: false, error: 'Method not allowed' });
-  }
-
-  const { url } = req.query;
-
-  if (!url) {
-    return res.status(400).json({ ok: false, error: 'Missing url parameter.' });
-  }
-
-  if (!isCdnAllowed(url)) {
-    return res.status(403).json({ ok: false, error: 'URL not from an allowed CDN.' });
-  }
+// api/proxy.js
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const fileUrl = req.query.url;
+  
+  if (!fileUrl) return res.status(400).send('Falta URL');
 
   try {
-    const upstream = await axios.get(url, {
-      responseType: 'stream',
-      timeout     : 30_000,
+    const upstream = await fetch(fileUrl, {
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-          '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Referer': 'https://www.tiktok.com/',
-      },
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'Referer': 'https://www.instagram.com/'
+      }
     });
 
-    const ct = upstream.headers['content-type'] || 'video/mp4';
-    const cl = upstream.headers['content-length'];
+    const contentType = upstream.headers.get('content-type') || 'video/mp4';
+    const ext = contentType.includes('audio') ? 'mp3' : 'mp4';
 
-    res.setHeader('Content-Type', ct);
-    res.setHeader('Content-Disposition', 'attachment; filename="tokless-video.mp4"');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'no-store');
-    if (cl) res.setHeader('Content-Length', cl);
-
-    upstream.data.pipe(res);
-  } catch (err) {
-    console.error('[proxy] error:', err.message);
-    if (!res.headersSent) {
-      res.status(502).json({ ok: false, error: 'Failed to fetch from CDN.' });
-    }
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="tikdrop.${ext}"`);
+    
+    // Leemos el archivo y lo enviamos al usuario
+    const buffer = await upstream.arrayBuffer();
+    res.send(Buffer.from(buffer));
+  } catch (error) {
+    // Si el proxy falla, lo mandamos al link original para que no se quede sin video
+    res.redirect(fileUrl);
   }
-};
+}
