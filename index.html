@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>TikDrop — Descarga TikTok e Instagram sin marca de agua</title>
   
+  <link rel="apple-touch-icon" href="https://downloadr2.apkmirror.com/wp-content/uploads/2023/09/99/6507b69ebd8d7_instagram.video.downloader.story.saver.png">
+  
   <link rel="icon" href="https://downloadr2.apkmirror.com/wp-content/uploads/2023/09/99/6507b69ebd8d7_instagram.video.downloader.story.saver.png" type="image/png">
   
   <style>
@@ -48,7 +50,7 @@
     .page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; position: relative; z-index: 1; }
     
     header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; display: flex; flex-direction: column; align-items: center; }
-    .logo-mark { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .logo-mark { display: inline-flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
     .logo-text { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-main); }
     .tagline { font-size: 15px; font-weight: 500; color: var(--text-muted); max-width: 300px; }
 
@@ -104,7 +106,7 @@
     .dl-btn.primary-dl:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
     .dl-btn.primary-dl .dl-btn-badge { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
-    .how-to { width: 100%; max-width: 520px; margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+    .how-to { margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; width: 100%; max-width: 520px; }
     .step { background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px 16px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
     .step-icon { width: 40px; height: 40px; background: var(--input-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-weight: 700; color: var(--text-main); font-size: 16px; }
     .step-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
@@ -137,7 +139,6 @@
 <div class="page">
   <header>
     <div class="logo-mark">
-      <img src="https://downloadr2.apkmirror.com/wp-content/uploads/2023/09/99/6507b69ebd8d7_instagram.video.downloader.story.saver.png" alt="TikDrop Logo" style="width: 42px; height: 42px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
       <span class="logo-text">TikDrop</span>
     </div>
     <p class="tagline">Descarga TikTok e Instagram sin marca de agua</p>
@@ -381,7 +382,7 @@
 
     document.getElementById('metaAuthor').textContent = '◈ Instagram Reel';
     document.getElementById('metaDesc').textContent = 'Video procesado con éxito';
-    document.getElementById('metaStats').innerHTML = ''; // Las APIs gratis no suelen dar stats fiables
+    document.getElementById('metaStats').innerHTML = '';
 
     const opts = document.getElementById('downloadOptions');
     opts.innerHTML = '';
