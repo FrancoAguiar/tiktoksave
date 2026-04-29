@@ -4,7 +4,8 @@ export default async function handler(req, res) {
   let igUrl = req.query.url;
   if (!igUrl) return res.status(400).json({ ok: false, error: 'Falta la URL de Instagram' });
 
-  const shortcodeMatch = igUrl.match(/(?:reel|p|tv)\/([^/?]+)/);
+  // Agregamos soporte para /reels/ con 's' por si acaso
+  const shortcodeMatch = igUrl.match(/(?:reel|reels|p|tv)\/([^/?]+)/);
   if (!shortcodeMatch) {
     return res.status(400).json({ ok: false, error: 'El enlace de Instagram no es válido.' });
   }
@@ -23,38 +24,51 @@ export default async function handler(req, res) {
       }
     });
     
-    const json = await response.json();
+    const text = await response.text();
+    let json;
+    try {
+        json = JSON.parse(text);
+    } catch(e) {
+        return res.status(502).json({ ok: false, error: 'La API devolvió un formato incorrecto.' });
+    }
 
+    // Si RapidAPI tira un mensaje de error propio (ej: límite alcanzado)
+    if (json.message && !json.data) {
+        return res.status(502).json({ ok: false, error: `RapidAPI dice: ${json.message}` });
+    }
+
+    // ── ESCÁNER AGRESIVO DE MP4 ──
+    const jsonString = JSON.stringify(json);
     let dlUrl = null;
-    let thumbUrl = ''; // Agregamos la variable para atrapar la miniatura
+    let thumbUrl = '';
 
-    // Lógica para video y miniatura
-    if (json.data && json.data.items && json.data.items[0]) {
-        const item = json.data.items[0];
-        
-        // 1. Extraer video
-        if (item.video_versions && item.video_versions.length > 0) {
-            dlUrl = item.video_versions[0].url; 
-        }
-        
-        // 2. Extraer miniatura (cover)
-        if (item.image_versions2 && item.image_versions2.candidates && item.image_versions2.candidates.length > 0) {
-            thumbUrl = item.image_versions2.candidates[0].url;
-        }
-    } 
+    // Buscamos cualquier enlace que termine en .mp4
+    const mp4Match = jsonString.match(/(https:\/\/[^"']+\.mp4[^"']*)/);
+    if (mp4Match) {
+        dlUrl = mp4Match[1];
+    } else {
+        // Fallback: buscamos una etiqueta que diga video_url
+        const videoMatch = jsonString.match(/"video_url"\s*:\s*"([^"]+)"/);
+        if (videoMatch) dlUrl = videoMatch[1];
+    }
 
-    // Respaldos por si la API cambia su estructura levemente
-    if (!dlUrl && json.video_url) dlUrl = json.video_url;
-    if (!dlUrl && json.data && json.data.video_url) dlUrl = json.data.video_url;
-    if (!thumbUrl && json.thumbnail_url) thumbUrl = json.thumbnail_url;
+    // Buscamos la miniatura
+    const thumbMatch = jsonString.match(/"(thumbnail_url|display_url)"\s*:\s*"([^"]+)"/);
+    if (thumbMatch) thumbUrl = thumbMatch[2];
 
     if (dlUrl) {
-      dlUrl = dlUrl.replace(/\\u0026/g, '&');
-      if (thumbUrl) thumbUrl = thumbUrl.replace(/\\u0026/g, '&');
+      // Limpiamos la basura del link
+      dlUrl = dlUrl.replace(/\\u0026/g, '&').replace(/\\/g, '');
+      if (thumbUrl) thumbUrl = thumbUrl.replace(/\\u0026/g, '&').replace(/\\/g, '');
       
       return res.status(200).json({ ok: true, data: { download: dlUrl, thumb: thumbUrl } });
     } else {
-      return res.status(502).json({ ok: false, error: 'La API no encontró el video. Verificá que no sea una foto.' });
+      // SI FALLA: Imprimimos los primeros 150 caracteres de lo que mandó la API para investigar
+      const debugData = jsonString.substring(0, 150);
+      return res.status(502).json({ 
+        ok: false, 
+        error: `API falló. Reporte: ${debugData}` 
+      });
     }
     
   } catch (e) {
