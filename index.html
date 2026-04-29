@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TikDrop — Descarga TikTok e Instagram</title>
+  <title>TikDrop — Descarga TikTok e Instagram sin marca de agua</title>
+  
+  <link rel="icon" href="https://downloadr2.apkmirror.com/wp-content/uploads/2023/09/99/6507b69ebd8d7_instagram.video.downloader.story.saver.png" type="image/png">
+  
   <style>
     :root {
       --bg-color: #fbfbfd; --surface: rgba(255, 255, 255, 0.6); --surface-hover: rgba(255, 255, 255, 0.8);
@@ -26,9 +29,9 @@
       }
     }
 
+    /* Colores acento para modo Instagram */
     body.ig-mode { --accent: #e1306c; --accent-hover: #c13584; }
-    @media (prefers-color-scheme: light) { body.ig-mode { --btn-bg: #e1306c; --btn-text: #ffffff; } }
-    @media (prefers-color-scheme: dark) { body.ig-mode { --btn-bg: #e1306c; --btn-text: #ffffff; } }
+    body.ig-mode .btn-fetch { background: #e1306c; color: #ffffff; }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-sans); font-size: 15px; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background-color 0.3s; }
@@ -44,10 +47,10 @@
 
     .page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; position: relative; z-index: 1; }
     
-    header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .logo-mark { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    header { text-align: center; margin-bottom: 40px; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; display: flex; flex-direction: column; align-items: center; }
+    .logo-mark { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .logo-text { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; color: var(--text-main); }
-    .tagline { font-size: 15px; font-weight: 500; color: var(--text-muted); }
+    .tagline { font-size: 15px; font-weight: 500; color: var(--text-muted); max-width: 300px; }
 
     .card { width: 100%; max-width: 520px; background: var(--surface); backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%); border: 1px solid var(--border); box-shadow: var(--shadow-lg), inset 0 1px 0 var(--border-light); padding: 32px; border-radius: var(--radius-xl); animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
     
@@ -59,7 +62,8 @@
     .input-group { margin-bottom: 16px; position: relative; display: flex; align-items: center; }
     .url-input { width: 100%; background: var(--input-bg); border: 1px solid transparent; color: var(--text-main); font-family: var(--font-sans); font-size: 16px; padding: 16px 44px 16px 20px; border-radius: var(--radius-lg); outline: none; transition: all 0.3s ease; }
     .url-input::placeholder { color: var(--text-muted); }
-    .url-input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(var(--accent), 0.15); }
+    .url-input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1); }
+    body.ig-mode .url-input:focus { box-shadow: 0 0 0 4px rgba(225, 48, 108, 0.1); }
     
     .input-actions { position: absolute; right: 16px; display: flex; align-items: center; gap: 8px; }
     .action-btn { background: var(--text-main); color: var(--bg-color); border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s, opacity 0.2s; opacity: 0.8; }
@@ -68,7 +72,7 @@
     .action-btn svg { width: 14px; height: 14px; stroke-width: 2.5; }
     .action-btn.hidden { display: none; }
 
-    .btn-fetch { display: block; width: 100%; background: var(--btn-bg); color: var(--btn-text); border: none; font-size: 15px; font-weight: 600; padding: 16px; cursor: pointer; transition: transform 0.1s, opacity 0.2s; border-radius: var(--radius-lg); margin-top: 12px; }
+    .btn-fetch { display: block; width: 100%; background: var(--btn-bg); color: var(--btn-text); border: none; font-size: 15px; font-weight: 600; padding: 16px; cursor: pointer; transition: all 0.2s; border-radius: var(--radius-lg); margin-top: 12px; }
     .btn-fetch:hover:not(:disabled) { opacity: 0.9; transform: scale(0.99); }
     .btn-fetch:active:not(:disabled) { transform: scale(0.97); }
     .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -133,11 +137,7 @@
 <div class="page">
   <header>
     <div class="logo-mark">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-main);">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
+      <img src="https://downloadr2.apkmirror.com/wp-content/uploads/2023/09/99/6507b69ebd8d7_instagram.video.downloader.story.saver.png" alt="TikDrop Logo" style="width: 42px; height: 42px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
       <span class="logo-text">TikDrop</span>
     </div>
     <p class="tagline">Descarga TikTok e Instagram sin marca de agua</p>
@@ -168,7 +168,7 @@
     </div>
     
     <button class="btn-fetch" id="fetchBtn">Descargar Video</button>
-    <p class="hint" id="hintText" style="margin-top: 12px;">Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com</p>
+    <p class="hint" id="hintText" style="margin-top: 12px;">Soporta tiktok.com, vm.tiktok.com y v.tiktok.com</p>
     
     <div id="status"></div>
     
@@ -208,7 +208,7 @@
       </div>
     </div>
   </div>
-  <footer><p>Herramienta 100% gratuita &nbsp;·&nbsp; Privacidad garantizada</p></footer>
+  <footer><p>Herramienta 100% gratuita &nbsp;·&nbsp; TikDrop por Fran Aguiar & Girlfriend</p></footer>
 </div>
 
 <script>
@@ -242,13 +242,13 @@
       document.body.classList.remove('ig-mode');
       tabTiktok.classList.add('active'); tabInstagram.classList.remove('active');
       urlInput.placeholder = 'Pega el enlace de tu TikTok aquí...';
-      hintText.textContent = 'Soporta enlaces de tiktok.com, vm.tiktok.com y v.tiktok.com';
+      hintText.textContent = 'Soporta tiktok.com, vm.tiktok.com y v.tiktok.com';
       step1Desc.textContent = "Abre TikTok, toca 'Compartir' y elige 'Copiar enlace'.";
     } else {
       document.body.classList.add('ig-mode');
       tabInstagram.classList.add('active'); tabTiktok.classList.remove('active');
       urlInput.placeholder = 'Pega el enlace de tu Instagram Reel aquí...';
-      hintText.textContent = 'Soporta enlaces de Reels públicos (instagram.com/reel/...)';
+      hintText.textContent = 'Soporta Reels públicos (instagram.com/reel/...)';
       step1Desc.textContent = "Abre Instagram, toca en 'Compartir' y copia el enlace del Reel.";
     }
   }
@@ -259,7 +259,8 @@
   fetchBtn.addEventListener('click', fetchVideo);
 
   function toggleInputButtons() {
-    if (urlInput.value.trim().length > 0) {
+    const hasText = urlInput.value.trim().length > 0;
+    if (hasText) {
       pasteBtn.classList.add('hidden');
       clearBtn.classList.remove('hidden');
     } else {
@@ -278,14 +279,17 @@
 
   pasteBtn.addEventListener('click', async () => {
     try {
+      // Intenta leer el portapapeles
       const text = await navigator.clipboard.readText();
       if (text) {
         urlInput.value = text;
         toggleInputButtons();
-        fetchVideo(); // Arranca a descargar automático!
+        // Arranca a descargar automático al pegar!
+        fetchVideo(); 
       }
     } catch (err) {
-      alert('Tu navegador no permite leer el portapapeles directamente. Por favor, pega el texto manualmente.');
+      // Fallback si el navegador bloquea el acceso
+      alert('Tu navegador bloqueó el acceso al portapapeles. Por favor, pega el enlace manualmente con Ctrl+V o manteniendo presionado.');
     }
   });
 
@@ -301,10 +305,13 @@
     return String(n);
   }
 
+  // --- Función Principal ---
   async function fetchVideo() {
     const url = urlInput.value.trim();
     if (!url) { setStatus('error', 'Por favor, pega un enlace válido primero.'); return; }
-    resultEl.style.display = 'none'; fetchBtn.disabled = true;
+    
+    resultEl.style.display = 'none'; 
+    fetchBtn.disabled = true;
     setStatus('loading', 'Preparando tu descarga...');
 
     try {
@@ -317,13 +324,16 @@
     }
   }
 
+  // --- Buscador TikTok ---
   async function fetchTikTok(url) {
     const res  = await fetch(`/api/video?url=${encodeURIComponent(url)}`);
     const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'Oops, no pudimos procesar ese enlace de TikTok.');
+    if (!json.ok) throw new Error(json.error || 'Oops, TikTok no respondió correctamente.');
     
     const d = json.data;
-    thumbContainer.innerHTML = `<img id="thumbImg" src="${d.cover || d.origin_cover || ''}" alt="Miniatura" />`;
+    // Miniatura
+    thumbContainer.innerHTML = `<img id="thumbImg" src="${d.cover || d.origin_cover || ''}" alt="Miniatura TikTok" />`;
+    // Meta
     document.getElementById('metaAuthor').textContent = '@' + (d.author?.unique_id || 'usuario');
     document.getElementById('metaDesc').textContent = d.title || 'Sin descripción';
     document.getElementById('metaStats').innerHTML = `
@@ -335,6 +345,7 @@
     opts.innerHTML = '';
     const btns = [];
 
+    // Botones TikTok (usan proxy para forzar descarga)
     if (d.play)  btns.push({ label: 'Descargar Video Sin Marca', badge: 'MP4', url: `/api/proxy?url=${encodeURIComponent(d.play)}`, primary: true });
     if (d.music) btns.push({ label: 'Descargar Solo Audio', badge: 'MP3', url: `/api/proxy?url=${encodeURIComponent(d.music)}`, primary: false });
 
@@ -344,31 +355,38 @@
       a.innerHTML = `<span>${b.label}</span><span class="dl-btn-badge">${b.badge}</span>`;
       opts.appendChild(a);
     });
-    resultEl.style.display = 'block'; setStatus('success', '¡Video listo! Elige un formato abajo para guardarlo.');
+    
+    resultEl.style.display = 'block'; 
+    setStatus('success', '¡Video de TikTok listo! Descárgalo abajo.');
   }
 
+  // --- Buscador Instagram ---
   async function fetchInstagram(url) {
+    // Limpieza agresiva de URL
     const cleanUrl = url.split('?')[0];
     const res  = await fetch(`/api/instagram?url=${encodeURIComponent(cleanUrl)}`);
     const json = await res.json();
     
-    if (!json.ok) throw new Error(json.error || 'Instagram bloqueó el video o es privado.');
+    if (!json.ok) throw new Error(json.error || 'No pudimos descargar este Reel. Verifica que la cuenta sea pública.');
 
     const d = json.data;
+    
+    // Miniatura CORRECTA pasando por Proxy anti-bloqueo
     if (d.thumb) {
-      // Solución Anti-Bloqueo de Imágenes: Pasamos la miniatura por nuestro proxy de Vercel
-      thumbContainer.innerHTML = `<img id="thumbImg" src="/api/proxy?url=${encodeURIComponent(d.thumb)}" alt="Miniatura" />`;
+      thumbContainer.innerHTML = `<img id="thumbImg" src="/api/proxy?url=${encodeURIComponent(d.thumb)}" alt="Miniatura Reel" />`;
     } else {
-      thumbContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
+      // Fallback a icono si no hay miniatura
+      thumbContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
     }
 
     document.getElementById('metaAuthor').textContent = '◈ Instagram Reel';
-    document.getElementById('metaDesc').textContent = '¡Video procesado correctamente!';
-    document.getElementById('metaStats').innerHTML = '';
+    document.getElementById('metaDesc').textContent = 'Video procesado con éxito';
+    document.getElementById('metaStats').innerHTML = ''; // Las APIs gratis no suelen dar stats fiables
 
     const opts = document.getElementById('downloadOptions');
     opts.innerHTML = '';
 
+    // Botón Único de Descarga (pasa por Proxy para forzar descarga)
     const a = document.createElement('a');
     a.href = `/api/proxy?url=${encodeURIComponent(d.download)}`; 
     a.target = '_blank'; 
@@ -376,7 +394,8 @@
     a.innerHTML = `<span>Descargar Reel</span><span class="dl-btn-badge">MP4</span>`;
     opts.appendChild(a);
 
-    resultEl.style.display = 'block'; setStatus('success', '¡Reel encontrado! Haz clic abajo para descargarlo.');
+    resultEl.style.display = 'block'; 
+    setStatus('success', '¡Reel encontrado! Haz clic abajo para guardarlo.');
   }
 </script>
 </body>
